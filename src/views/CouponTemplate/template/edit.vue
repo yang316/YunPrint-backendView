@@ -10,30 +10,23 @@
     @before-ok="submit">
     <!-- 表单信息 start -->
     <a-form ref="formRef" :model="formData" :rules="rules" :auto-label-width="true">
-      <a-form-item label="选项类型" field="type">
-        <sa-select v-model="formData.type" dict="print_option_type" placeholder="请选择选项类型" />
+      <a-form-item label="优惠券标题" field="title">
+        <a-input v-model="formData.title" placeholder="请输入优惠券标题" />
       </a-form-item>
-      <a-form-item label="选项名称" field="name">
-        <a-input v-model="formData.name" placeholder="请输入选项名称" />
+      <a-form-item label="优惠券类型" field="type" hidden>
+        <a-input v-model="formData.type" placeholder="请输入优惠券类型" />
       </a-form-item>
-      <a-form-item label="选项值" field="value">
-        <a-input v-model="formData.value" placeholder="请输入选项值" />
+      <a-form-item label="优惠金额" field="amount">
+        <a-input v-model="formData.amount" placeholder="请输入优惠金额" />
       </a-form-item>
-      <a-form-item label="最大页数" field="max_pages" v-show="formData.type == 'binding'">
-        <a-input v-model="formData.max_pages" type="number" placeholder="请输入最大页数" />
+      <a-form-item label="满减门槛金额" field="min_amount">
+        <a-input v-model="formData.min_amount" placeholder="请输入满减门槛金额" />
       </a-form-item>
-      <a-form-item label="价格" field="price">
-        <a-input v-model="formData.price" type="number" placeholder="请输入价格" />
-      </a-form-item>
-      
-      <a-form-item label="排序" field="sort">
-        <a-input v-model="formData.sort" placeholder="请输入排序" />
-      </a-form-item>
-      <a-form-item label="是否默认" field="is_default">
-        <sa-radio v-model="formData.is_default" dict="yes_or_no" placeholder="请选择是否默认" allow-clear />
+      <a-form-item label="有效天数" field="valid_days" tooltip="领取后n天有效">
+        <a-input v-model="formData.valid_days" placeholder="请输入有效天数" />
       </a-form-item>
       <a-form-item label="状态" field="status">
-        <sa-switch v-model="formData.status" checkedValue="1" uncheckedValue="0" dict="is_disable" placeholder="请选择状态" allow-clear />
+        <a-switch v-model="formData.status" :checkedValue="1"  :uncheckedValue="0" />
       </a-form-item>
     </a-form>
     <!-- 表单信息 end -->
@@ -44,7 +37,7 @@
 import { ref, reactive, computed } from 'vue'
 import tool from '@/utils/tool'
 import { Message, Modal } from '@arco-design/web-vue'
-import api from '../api/setting'
+import api from '../api/template'
 
 const emit = defineEmits(['success'])
 // 引用定义
@@ -54,20 +47,18 @@ const formRef = ref()
 const mode = ref('')
 
 let title = computed(() => {
-  return '打印设置' + (mode.value == 'add' ? '-新增' : '-编辑')
+  return '优惠券模板表' + (mode.value == 'add' ? '-新增' : '-编辑')
 })
 
 // 表单初始值
 const initialFormData = {
   id: null,
-  name: '',
-  value: '',
-  price: '0.00',
-  sort: null,
-  is_default: 1,
-  status: 0,
-  type: '',
-  max_pages:0,
+  title: '',
+  type: 1,
+  amount: '0.00',
+  min_amount: '0.00',
+  valid_days: 7,
+  status:0,
 }
 
 // 表单信息
@@ -75,14 +66,14 @@ const formData = reactive({ ...initialFormData })
 
 // 验证规则
 const rules = {
-  type: [{ required: true, message: '选项类型必需填写' }],
-  name: [{ required: true, message: '选项名称必需填写' }],
-  value: [{ required: true, message: '选项值必需填写' }],
-  price: [{ required: true, message: '价格必需填写' }],
-  sort: [{ required: true, message: '排序必需填写' }],
-  is_default: [{ required: true, message: '是否默认必需填写' }],
-  status: [{ required: true, message: '状态必需填写' }],
-  max_pages: [{ required: true, message: '最大页数必需填写' }],
+  title: [{ required: true, message: '优惠券标题必需填写' }],
+  type: [{ required: true, message: '优惠券类型必需填写' }],
+  amount: [{ required: true, message: '优惠金额必需填写' }],
+  min_amount: [{ required: true, message: '满减门槛金额必需填写' }],
+  valid_days: [{ required: true, message: '有效天数必需填写' }],
+  status: [{ required: true, message: '状态必须选择' }],
+  // created_time: [{ required: true, message: '创建时间必需填写' }],
+  // updated_time: [{ required: true, message: '更新时间必需填写' }],
 }
 
 // 打开弹框
