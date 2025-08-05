@@ -1,7 +1,7 @@
 import { request } from '@/utils/request.js'
 
 /**
- * 优惠券模板表 API接口
+ * 用户管理 API接口
  */
 export default {
 
@@ -11,7 +11,7 @@ export default {
    */
   getPageList(params = {}) {
     return request({
-      url: '/backend/CouponTemplate/CouponTemplate/index',
+      url: '/backend/user/User/index',
       method: 'get',
       params
     })
@@ -23,7 +23,7 @@ export default {
    */
   save(params = {}) {
     return request({
-      url: '/backend/CouponTemplate/CouponTemplate/save',
+      url: '/backend/user/User/save',
       method: 'post',
       data: params
     })
@@ -35,7 +35,7 @@ export default {
    */
   update(id, data = {}) {
     return request({
-      url: '/backend/CouponTemplate/CouponTemplate/update?id=' + id,
+      url: '/backend/user/User/update?id=' + id,
       method: 'put',
       data
     })
@@ -47,7 +47,7 @@ export default {
    */
   read(id) {
     return request({
-      url: '/backend/CouponTemplate/CouponTemplate/read?id=' + id,
+      url: '/backend/user/User/read?id=' + id,
       method: 'get'
     })
   },
@@ -58,21 +58,10 @@ export default {
    */
   destroy(data) {
     return request({
-      url: '/backend/CouponTemplate/CouponTemplate/destroy',
+      url: '/backend/user/User/destroy',
       method: 'delete',
       data
     })
   },
-  /**
-   * 发放优惠券
-   * @param {*} data 
-   * @returns 
-   */
-  distributeCoupon(data){
-    return request({
-      url: '/backend/CouponTemplate/CouponTemplate/distributeCoupon',
-      method: 'post',
-      data
-    })
-  }
+
 }
