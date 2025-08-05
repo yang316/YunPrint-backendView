@@ -24,6 +24,15 @@
           <template #icon><icon-eye /></template>
           查看详情
         </a-button>
+        <a-button 
+          v-if="record.status === 1 && record.payStatus === 1"
+          type="text" 
+          size="small" 
+          @click="showShippingModal(record)"
+          style="color: #00b42a;">
+          <template #icon><icon-truck /></template>
+          发货
+        </a-button>
       </template>
     </sa-table>
 
@@ -74,6 +83,97 @@
       </div>
       <a-empty v-else description="暂无订单项数据" />
     </a-modal>
+    
+    <!-- 发货弹窗 -->
+    <a-modal
+      v-model:visible="shippingVisible"
+      title="订单发货"
+      :width="700"
+      @ok="handleShipping"
+      @cancel="closeShippingModal"
+      :ok-loading="shippingLoading">
+      <div v-if="selectedOrder">
+        <!-- 订单基本信息 -->
+        <a-descriptions :column="2" bordered style="margin-bottom: 16px;">
+          <a-descriptions-item label="订单号">
+            {{ selectedOrder.order_sn }}
+          </a-descriptions-item>
+          <a-descriptions-item label="用户">
+            {{ selectedOrder.user?.nickname }}
+          </a-descriptions-item>
+          <a-descriptions-item label="订单金额">
+            ¥{{ selectedOrder.totalPrice }}
+          </a-descriptions-item>
+          <a-descriptions-item label="订单状态">
+            已确认
+          </a-descriptions-item>
+        </a-descriptions>
+        
+        <!-- 发货表单 -->
+        <a-form :model="shippingForm" layout="vertical">
+          <a-row :gutter="16">
+            <a-col :span="12">
+              <a-form-item label="收货人姓名" required>
+                <a-input v-model="shippingForm.receiver_name" placeholder="请输入收货人姓名" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12">
+              <a-form-item label="收货人电话" required>
+                <a-input v-model="shippingForm.receiver_phone" placeholder="请输入收货人电话" />
+              </a-form-item>
+            </a-col>
+          </a-row>
+          
+          <a-form-item label="收货地址" required>
+            <a-textarea 
+              v-model="shippingForm.receiver_address" 
+              placeholder="请输入详细收货地址"
+              :rows="2"
+            />
+          </a-form-item>
+          
+          <a-row :gutter="16">
+            <a-col :span="8">
+              <a-form-item label="省份">
+                <a-input v-model="shippingForm.province" placeholder="省份" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="8">
+              <a-form-item label="城市">
+                <a-input v-model="shippingForm.city" placeholder="城市" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="8">
+              <a-form-item label="区县">
+                <a-input v-model="shippingForm.district" placeholder="区县" />
+              </a-form-item>
+            </a-col>
+          </a-row>
+          
+          <a-form-item label="物品重量(kg)">
+            <a-input-number 
+              v-model="shippingForm.weight" 
+              :min="0.1" 
+              :step="0.1"
+              placeholder="请输入物品重量"
+              style="width: 100%;"
+            />
+          </a-form-item>
+          
+          <a-form-item label="物品描述">
+            <a-input v-model="shippingForm.goods_desc" placeholder="打印文件" />
+          </a-form-item>
+          
+          <a-form-item label="备注">
+            <a-textarea 
+              v-model="shippingForm.remark" 
+              placeholder="发货备注（可选）"
+              :rows="2"
+            />
+          </a-form-item>
+        </a-form>
+      </div>
+    </a-modal>
 
   </div>
 </template>
@@ -84,6 +184,7 @@ import { Message } from '@arco-design/web-vue'
 import EditForm from './edit.vue'
 import api from '../api/order'
 import userApi from '../../user/api/user'
+import shippingApi from '../api/shipping'
 
 // 引用定义
 const crudRef = ref()
@@ -92,7 +193,24 @@ const viewRef = ref()
 // 订单详情相关
 const detailVisible = ref(false)
 const orderItems = ref([])
+const detailLoading = ref(false)
 const userList = ref([])
+
+// 发货相关
+const shippingVisible = ref(false)
+const selectedOrder = ref(null)
+const shippingLoading = ref(false)
+const shippingForm = ref({
+  receiver_name: '',
+  receiver_phone: '',
+  receiver_address: '',
+  province: '',
+  city: '',
+  district: '',
+  weight: 0.5,
+  goods_desc: '打印文件',
+  remark: ''
+})
 // 搜索表单
 const searchForm = ref({
   payType: '',
@@ -199,6 +317,83 @@ const closeDetails = () => {
 //     return []
 //   }
 // }
+
+// 显示发货弹窗
+const showShippingModal = (record) => {
+  selectedOrder.value = record
+  // 重置表单
+  shippingForm.value = {
+    receiver_name: '',
+    receiver_phone: '',
+    receiver_address: '',
+    province: '',
+    city: '',
+    district: '',
+    weight: 0.5,
+    goods_desc: '打印文件',
+    remark: ''
+  }
+  shippingVisible.value = true
+}
+
+// 关闭发货弹窗
+const closeShippingModal = () => {
+  shippingVisible.value = false
+  selectedOrder.value = null
+}
+
+// 处理发货
+const handleShipping = async () => {
+  if (!selectedOrder.value) return
+  
+  // 表单验证
+  if (!shippingForm.value.receiver_name || !shippingForm.value.receiver_phone || !shippingForm.value.receiver_address) {
+    Message.error('请填写完整的收货信息')
+    return
+  }
+  
+  try {
+    shippingLoading.value = true
+    
+    // 构建中通物流电子面单参数
+    const shippingData = {
+      order_id: selectedOrder.value.id,
+      order_sn: selectedOrder.value.order_sn,
+      receiver: {
+        name: shippingForm.value.receiver_name,
+        phone: shippingForm.value.receiver_phone,
+        address: shippingForm.value.receiver_address,
+        province: shippingForm.value.province,
+        city: shippingForm.value.city,
+        district: shippingForm.value.district
+      },
+      goods: {
+        weight: shippingForm.value.weight,
+        description: shippingForm.value.goods_desc
+      },
+      remark: shippingForm.value.remark
+    }
+    
+    // 调用中通物流电子面单API
+    const response = await shippingApi.createZTOWaybill(shippingData)
+    
+    if (response.code !== 200) {
+      throw new Error(response.message || '创建电子面单失败')
+    }
+    
+    Message.success('发货成功！快递单号将通过短信发送给用户')
+    closeShippingModal()
+    
+    // 刷新列表
+    crudRef.value?.refresh()
+    
+  } catch (error) {
+    console.error('发货失败:', error)
+    Message.error('发货失败，请重试')
+  } finally {
+    shippingLoading.value = false
+  }
+}
 
 // 页面加载完成执行
 onMounted(async () => {

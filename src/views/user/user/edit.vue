@@ -42,7 +42,7 @@ import tool from '@/utils/tool'
 import { Message, Modal } from '@arco-design/web-vue'
 import api from '../api/user'
 
-const emit = defineEmi ts(['success'])
+const emit = defineEmits(['success'])
 // 引用定义
 const visible = ref(false)
 const loading = ref(false)
