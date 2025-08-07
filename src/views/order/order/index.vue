@@ -4,8 +4,13 @@
       <!-- 搜索区 tableSearch -->
       <template #tableSearch>
         <a-col :sm="8" :xs="24">
-          <a-form-item label="支付方式" field="payType">
-            <a-input v-model="searchForm.payType" placeholder="请输入支付方式" allow-clear />
+          <a-form-item label="订单状态" field="status">
+            <sa-select v-model="searchForm.status" dict="orderStatus" placeholder="请选择订单状态" allow-clear />
+          </a-form-item>
+        </a-col>
+        <a-col :sm="8" :xs="24">
+          <a-form-item label="支付状态" field="payStatus">
+            <sa-select v-model="searchForm.payStatus" dict="payStatus" placeholder="请选择支付状态" allow-clear />
           </a-form-item>
         </a-col>
         <a-col :sm="8" :xs="24">
@@ -213,7 +218,11 @@ const shippingForm = ref({
 })
 // 搜索表单
 const searchForm = ref({
-  payType: '',
+  payStatus: '',
+  orderBy: 'id',
+  orderType: 'desc',
+  status:'',
+  status:'',
 })
 
 // SaTable 基础配置
@@ -254,14 +263,15 @@ const options = reactive({
 
 // SaTable 列配置
 const columns = reactive([
-  { title: '用户ID', dataIndex: 'user.nickname', width: 180 },
+  { title: 'id', dataIndex: 'id', width: 100,sortable: { sortDirections: ['ascend', 'descend'] } },
+  { title: '用户', dataIndex: 'user.nickname', width: 180 },
   { title: '订单号', dataIndex: 'order_sn', width: 180 },
-  { title: '总价', dataIndex: 'totalPrice', width: 180 },
-  { title: '优惠券', dataIndex: 'couponPrice', width: 180 },
-  { title: '邮费', dataIndex: 'postage', width: 180 },
-  { title: '支付方式', dataIndex: 'payType', width: 180 },
-  { title: '订单状态',type:'dict',dict:'orderStatus', dataIndex: 'status', width: 180 },
-  { title: '支付状态',type:'dict',dict:'payStatus', dataIndex: 'payStatus', width: 180 },
+  { title: '总价', dataIndex: 'totalPrice', width: 70 },
+  { title: '优惠券', dataIndex: 'couponPrice', width: 70 },
+  { title: '邮费', dataIndex: 'postage', width: 70 },
+  { title: '支付方式', dataIndex: 'payType', width: 70 },
+  { title: '订单状态',type:'dict',dict:'orderStatus', dataIndex: 'status', width: 70 },
+  { title: '支付状态',type:'dict',dict:'payStatus', dataIndex: 'payStatus', width: 70 },
 ])
 
 // 页面数据初始化
