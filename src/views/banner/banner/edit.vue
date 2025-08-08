@@ -3,26 +3,8 @@
     :title="title" :mask-closable="false" :ok-loading="loading" @cancel="close" @before-ok="submit">
     <!-- 表单信息 start -->
     <a-form ref="formRef" :model="formData" :rules="rules" :auto-label-width="true">
-      <a-form-item label="优惠券标题" field="title">
-        <a-input v-model="formData.title" placeholder="请输入优惠券标题" />
-      </a-form-item>
-      <a-form-item label="优惠券类型" field="type" hidden>
-        <a-input v-model="formData.type" placeholder="请输入优惠券类型" />
-      </a-form-item>
-      <a-form-item label="优惠金额" field="amount">
-        <a-input v-model="formData.amount" placeholder="请输入优惠金额" />
-      </a-form-item>
-      <a-form-item label="满减门槛金额" field="min_amount">
-        <a-input v-model="formData.min_amount" placeholder="请输入满减门槛金额" />
-      </a-form-item>
-      <a-form-item label="有效天数" field="valid_days" tooltip="领取后n天有效">
-        <a-input v-model="formData.valid_days" placeholder="请输入有效天数" />
-      </a-form-item>
-      <a-form-item label="状态" field="status">
-        <a-switch v-model="formData.status" :checkedValue="1" :uncheckedValue="0" />
-      </a-form-item>
-      <a-form-item label="首页弹窗显示" field="home_show">
-        <a-switch v-model="formData.home_show" :checkedValue="1" :uncheckedValue="0" />
+      <a-form-item label="轮播图" field="images">
+        <sa-upload-image v-model="formData.images" :limit="3" :multiple="true" />
       </a-form-item>
     </a-form>
     <!-- 表单信息 end -->
@@ -33,7 +15,7 @@
 import { ref, reactive, computed } from 'vue'
 import tool from '@/utils/tool'
 import { Message, Modal } from '@arco-design/web-vue'
-import api from '../api/template'
+import api from '../api/banner'
 
 const emit = defineEmits(['success'])
 // 引用定义
@@ -43,19 +25,13 @@ const formRef = ref()
 const mode = ref('')
 
 let title = computed(() => {
-  return '优惠券模板表' + (mode.value == 'add' ? '-新增' : '-编辑')
+  return '轮播图管理' + (mode.value == 'add' ? '-新增' : '-编辑')
 })
 
 // 表单初始值
 const initialFormData = {
   id: null,
-  title: '',
-  type: 1,
-  amount: '0.00',
-  min_amount: '0.00',
-  valid_days: 7,
-  status: 0,
-  home_show: 0
+  images: [],
 }
 
 // 表单信息
@@ -63,15 +39,7 @@ const formData = reactive({ ...initialFormData })
 
 // 验证规则
 const rules = {
-  title: [{ required: true, message: '优惠券标题必需填写' }],
-  type: [{ required: true, message: '优惠券类型必需填写' }],
-  amount: [{ required: true, message: '优惠金额必需填写' }],
-  min_amount: [{ required: true, message: '满减门槛金额必需填写' }],
-  valid_days: [{ required: true, message: '有效天数必需填写' }],
-  status: [{ required: true, message: '状态必须选择' }],
-  home_show: [{ required: true, message: '首页弹窗显示必须选择' }],
-  // created_time: [{ required: true, message: '创建时间必需填写' }],
-  // updated_time: [{ required: true, message: '更新时间必需填写' }],
+
 }
 
 // 打开弹框

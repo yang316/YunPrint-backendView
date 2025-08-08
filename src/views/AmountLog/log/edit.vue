@@ -9,32 +9,20 @@
           <a-option v-for="item in userList" :value="item.id" :label="item.nickname" />
         </a-select>
       </a-form-item>
-      <a-form-item label="订单号" field="order_sn">
-        <a-input v-model="formData.order_sn" placeholder="请输入订单号" />
+      <a-form-item label="变动余额" field="amount">
+        <a-input v-model="formData.amount" placeholder="请输入变动余额" />
       </a-form-item>
-      <a-form-item label="总价" field="totalPrice">
-        <a-input-number v-model="formData.totalPrice" placeholder="请输入总价" />
+      <a-form-item label="类型" field="type">
+        <a-select placeholder="请选择类型" v-model="formData.type" allow-clear>
+          <a-option value="0" label="收益" />
+          <a-option value="2" label="提现" />
+        </a-select>
       </a-form-item>
-      <a-form-item label="优惠券金额" field="couponPrice">
-        <a-input-number v-model="formData.couponPrice" placeholder="请输入优惠券" />
-      </a-form-item>
-      <a-form-item label="邮费" field="postage">
-        <a-input-number v-model="formData.postage" placeholder="请输入邮费" />
-      </a-form-item>
-      <!-- <a-form-item label="支付方式" field="payType">
-        <a-input v-model="formData.payType" placeholder="请输入支付方式" />
-      </a-form-item> -->
-      <a-form-item label="订单状态" field="status">
-        <!-- <a-input v-model="formData.status" placeholder="请输入订单状态" /> -->
-        <sa-radio v-model="formData.status" dict="orderStatus"></sa-radio>
-      </a-form-item>
-      <a-form-item label="支付状态" field="payStatus">
-        <sa-radio v-model="formData.payStatus" dict="payStatus"></sa-radio>
-        <!-- <a-input v-model="formData.payStatus" placeholder="请输入支付状态" /> -->
+      <a-form-item label="备注" field="remark">
+        <a-input v-model="formData.remark" placeholder="请输入备注" />
       </a-form-item>
     </a-form>
     <!-- 表单信息 end -->
-
   </component>
 </template>
 
@@ -42,8 +30,9 @@
 import { ref, reactive, computed } from 'vue'
 import tool from '@/utils/tool'
 import { Message, Modal } from '@arco-design/web-vue'
-import api from '../api/order'
+import api from '../api/log'
 import userApi from '../../user/api/user'
+
 const emit = defineEmits(['success'])
 // 引用定义
 const visible = ref(false)
@@ -53,20 +42,16 @@ const mode = ref('')
 const userList = ref([])
 const userLoading = ref(false)
 let title = computed(() => {
-  return '订单管理' + (mode.value == 'add' ? '-新增' : '-编辑')
+  return '用户余额记录' + (mode.value == 'add' ? '-新增' : '-编辑')
 })
 
 // 表单初始值
 const initialFormData = {
   id: null,
   user_id: null,
-  order_sn: '',
-  totalPrice: 0,
-  couponPrice: 0,
-  postage: 0,
-  payType: 'wechat',
-  status: 0,
-  payStatus: 0,
+  amount: '0.00',
+  type: null,
+  remark: '',
 }
 
 // 表单信息
@@ -75,11 +60,8 @@ const formData = reactive({ ...initialFormData })
 // 验证规则
 const rules = {
   user_id: [{ required: true, message: '用户ID必需填写' }],
-  order_sn: [{ required: true, message: '订单号必需填写' }],
-  totalPrice: [{ required: true, message: '总价必需填写' }],
-  couponPrice: [{ required: true, message: '优惠券价格必需填写' }],
-  postage: [{ required: true, message: '邮费必需填写' }],
-  payType: [{ required: true, message: '支付方式必需填写' }],
+  amount: [{ required: true, message: '变动余额必需填写' }],
+  type: [{ required: true, message: '必须选择类型' }],
 }
 
 // 打开弹框
@@ -94,9 +76,17 @@ const open = async (type = 'add') => {
 
 // 初始化页面数据
 const initPage = async () => {
+  // userLoading.value = true
   await searchUser()
 }
-
+// 搜索用户
+const searchUser = async (value) => {
+  // console.log(value)
+  userLoading.value = true
+  const userResp = await userApi.getPageList({ nickname: value })
+  userList.value = userResp.data.data
+  userLoading.value = false
+}
 // 设置数据
 const setFormData = async (data) => {
   for (const key in formData) {
@@ -105,13 +95,7 @@ const setFormData = async (data) => {
     }
   }
 }
-// 搜索用户
-const searchUser = async (value) => {
-  userLoading.value = true
-  const userResp = await userApi.getPageList()
-  userList.value = userResp.data.data
-  userLoading.value = false
-}
+
 // 数据保存
 const submit = async (done) => {
   const validate = await formRef.value?.validate()

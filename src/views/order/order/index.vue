@@ -15,8 +15,8 @@
         </a-col>
         <a-col :sm="8" :xs="24">
           <a-form-item label="用户ID" field="user_id">
-            <a-select placeholder="请选择用户" v-model="searchForm.user_id" allow-search @search="handleStudySearch"
-              :loading="studyLoding">
+            <a-select placeholder="请选择用户" v-model="searchForm.user_id" allow-search @search="handleUserSearch"
+              :loading="userLoading">
               <a-option v-for="item in userList" :value="item.id" :label="item.nickname" />
             </a-select>
           </a-form-item>
@@ -29,13 +29,11 @@
           <template #icon><icon-eye /></template>
           查看详情
         </a-button>
-        <a-button 
-          v-if="record.status === 1 && record.payStatus === 1"
-          type="text" 
-          size="small" 
-          @click="showShippingModal(record)"
-          style="color: #00b42a;">
-          <template #icon><icon-truck /></template>
+        <a-button v-if="record.status === 1 && record.payStatus === 1" type="text" size="small"
+          @click="showShippingModal(record)" style="color: #00b42a;">
+          <template #icon>
+            <sa-icon icon="bi:handbag" />
+          </template>
           发货
         </a-button>
       </template>
@@ -43,16 +41,12 @@
 
     <!-- 编辑表单 -->
     <edit-form ref="editRef" @success="refresh" />
-    
+
     <!-- 订单详情弹窗 -->
-    <a-modal
-      v-model:visible="detailVisible"
-      title="订单详情"
-      :width="800"
-      :footer="false"
-      @cancel="closeDetails">
+    <a-modal v-model:visible="detailVisible" title="订单详情" :width="800" :footer="false" @cancel="closeDetails">
       <div v-if="orderItems.length > 0">
-        <a-card v-for="(item, index) in orderItems" :key="item.id" :title="`文件 ${index + 1}: ${item.fileName}`" style="margin-bottom: 16px;">
+        <a-card v-for="(item, index) in orderItems" :key="item.id" :title="`文件 ${index + 1}: ${item.fileName}`"
+          style="margin-bottom: 16px;">
           <a-descriptions :column="2" bordered>
             <a-descriptions-item label="文件名">
               {{ item.fileName }}
@@ -73,7 +67,7 @@
               {{ item.atta_id }}
             </a-descriptions-item>
           </a-descriptions>
-          
+
           <!-- 打印选项 -->
           <div style="margin-top: 16px;">
             <h4>打印选项:</h4>
@@ -88,15 +82,10 @@
       </div>
       <a-empty v-else description="暂无订单项数据" />
     </a-modal>
-    
+
     <!-- 发货弹窗 -->
-    <a-modal
-      v-model:visible="shippingVisible"
-      title="订单发货"
-      :width="700"
-      @ok="handleShipping"
-      @cancel="closeShippingModal"
-      :ok-loading="shippingLoading">
+    <a-modal v-model:visible="shippingVisible" title="订单发货" :width="700" @ok="handleShipping"
+      @cancel="closeShippingModal" :ok-loading="shippingLoading">
       <div v-if="selectedOrder">
         <!-- 订单基本信息 -->
         <a-descriptions :column="2" bordered style="margin-bottom: 16px;">
@@ -113,7 +102,7 @@
             已确认
           </a-descriptions-item>
         </a-descriptions>
-        
+
         <!-- 发货表单 -->
         <a-form :model="shippingForm" layout="vertical">
           <a-row :gutter="16">
@@ -128,15 +117,11 @@
               </a-form-item>
             </a-col>
           </a-row>
-          
+
           <a-form-item label="收货地址" required>
-            <a-textarea 
-              v-model="shippingForm.receiver_address" 
-              placeholder="请输入详细收货地址"
-              :rows="2"
-            />
+            <a-textarea v-model="shippingForm.receiver_address" placeholder="请输入详细收货地址" :rows="2" />
           </a-form-item>
-          
+
           <a-row :gutter="16">
             <a-col :span="8">
               <a-form-item label="省份">
@@ -154,27 +139,18 @@
               </a-form-item>
             </a-col>
           </a-row>
-          
+
           <a-form-item label="物品重量(kg)">
-            <a-input-number 
-              v-model="shippingForm.weight" 
-              :min="0.1" 
-              :step="0.1"
-              placeholder="请输入物品重量"
-              style="width: 100%;"
-            />
+            <a-input-number v-model="shippingForm.weight" :min="0.1" :step="0.1" placeholder="请输入物品重量"
+              style="width: 100%;" />
           </a-form-item>
-          
+
           <a-form-item label="物品描述">
             <a-input v-model="shippingForm.goods_desc" placeholder="打印文件" />
           </a-form-item>
-          
+
           <a-form-item label="备注">
-            <a-textarea 
-              v-model="shippingForm.remark" 
-              placeholder="发货备注（可选）"
-              :rows="2"
-            />
+            <a-textarea v-model="shippingForm.remark" placeholder="发货备注（可选）" :rows="2" />
           </a-form-item>
         </a-form>
       </div>
@@ -200,6 +176,7 @@ const detailVisible = ref(false)
 const orderItems = ref([])
 const detailLoading = ref(false)
 const userList = ref([])
+const userLoading = ref(false)
 
 // 发货相关
 const shippingVisible = ref(false)
@@ -221,8 +198,9 @@ const searchForm = ref({
   payStatus: '',
   orderBy: 'id',
   orderType: 'desc',
-  status:'',
-  status:'',
+  status: '',
+  status: '',
+  user_id: '',
 })
 
 // SaTable 基础配置
@@ -263,31 +241,28 @@ const options = reactive({
 
 // SaTable 列配置
 const columns = reactive([
-  { title: 'id', dataIndex: 'id', width: 100,sortable: { sortDirections: ['ascend', 'descend'] } },
+  { title: 'id', dataIndex: 'id', width: 100, sortable: { sortDirections: ['ascend', 'descend'] } },
   { title: '用户', dataIndex: 'user.nickname', width: 180 },
   { title: '订单号', dataIndex: 'order_sn', width: 180 },
   { title: '总价', dataIndex: 'totalPrice', width: 70 },
   { title: '优惠券', dataIndex: 'couponPrice', width: 70 },
   { title: '邮费', dataIndex: 'postage', width: 70 },
   { title: '支付方式', dataIndex: 'payType', width: 70 },
-  { title: '订单状态',type:'dict',dict:'orderStatus', dataIndex: 'status', width: 70 },
-  { title: '支付状态',type:'dict',dict:'payStatus', dataIndex: 'payStatus', width: 70 },
+  { title: '订单状态', type: 'dict', dict: 'orderStatus', dataIndex: 'status', width: 70 },
+  { title: '支付状态', type: 'dict', dict: 'payStatus', dataIndex: 'payStatus', width: 70 },
 ])
 
 // 页面数据初始化
 const initPage = async () => {
-  const userResp = await userApi.getPageList()
-  userList.value = userResp.data.data
+  await handleUserSearch()
 }
 //搜索用户
-const handleStudySearch = async()=>{
-  searchForm.user_id = value
-  window.setTimeout(() => {
+const handleUserSearch = async (value) => {
+  userLoading.value = true
+  const userResp = await userApi.getPageList({ nickname: value })
+  userList.value = userResp.data.data
+  userLoading.value = false
 
-    userApi.getPageList({ nickname: value }).then(value => {
-      userList.value = value.data.data
-    })
-  }, 2000)
 }
 
 // SaTable 数据请求
@@ -355,16 +330,16 @@ const closeShippingModal = () => {
 // 处理发货
 const handleShipping = async () => {
   if (!selectedOrder.value) return
-  
+
   // 表单验证
   if (!shippingForm.value.receiver_name || !shippingForm.value.receiver_phone || !shippingForm.value.receiver_address) {
     Message.error('请填写完整的收货信息')
     return
   }
-  
+
   try {
     shippingLoading.value = true
-    
+
     // 构建中通物流电子面单参数
     const shippingData = {
       order_id: selectedOrder.value.id,
@@ -383,20 +358,20 @@ const handleShipping = async () => {
       },
       remark: shippingForm.value.remark
     }
-    
+
     // 调用中通物流电子面单API
     const response = await shippingApi.createZTOWaybill(shippingData)
-    
+
     if (response.code !== 200) {
       throw new Error(response.message || '创建电子面单失败')
     }
-    
+
     Message.success('发货成功！快递单号将通过短信发送给用户')
     closeShippingModal()
-    
+
     // 刷新列表
     crudRef.value?.refresh()
-    
+
   } catch (error) {
     console.error('发货失败:', error)
     Message.error('发货失败，请重试')

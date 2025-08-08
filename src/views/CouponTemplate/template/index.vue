@@ -8,11 +8,11 @@
             <a-input v-model="searchForm.title" placeholder="请输入优惠券标题" allow-clear />
           </a-form-item>
         </a-col>
-        <a-col :sm="8" :xs="24">
+        <!-- <a-col :sm="8" :xs="24">
           <a-form-item label="优惠券类型" field="type">
             <a-input v-model="searchForm.type" placeholder="请输入优惠券类型" allow-clear />
           </a-form-item>
-        </a-col>
+        </a-col> -->
       </template>
 
       <!-- Table 自定义渲染 -->
@@ -26,13 +26,9 @@
 
     <!-- 编辑表单 -->
     <edit-form ref="editRef" @success="refresh" />
-    
+
     <!-- 发放优惠券弹窗 -->
-    <a-modal
-      v-model:visible="distributeVisible"
-      title="发放优惠券"
-      :width="600"
-      @ok="handleDistribute"
+    <a-modal v-model:visible="distributeVisible" title="发放优惠券" :width="600" @ok="handleDistribute"
       @cancel="closeDistributeModal">
       <div v-if="selectedTemplate">
         <a-descriptions :column="1" bordered style="margin-bottom: 16px;">
@@ -49,23 +45,17 @@
             {{ selectedTemplate.valid_days }}天
           </a-descriptions-item>
         </a-descriptions>
-        
+
         <a-form :model="distributeForm" layout="vertical">
           <a-form-item label="选择用户" required>
-            <a-select
-              v-model="distributeForm.user_ids"
-              placeholder="请选择要发放的用户"
-              multiple
-              allow-search
-              :loading="userLoading"
-              @search="searchUsers"
-              style="width: 100%;">
+            <a-select v-model="distributeForm.user_ids" placeholder="请选择要发放的用户" multiple allow-search
+              :loading="userLoading" @search="searchUsers" style="width: 100%;">
               <a-option v-for="user in userList" :key="user.id" :value="user.id" :label="user.nickname">
                 {{ user.nickname }} ({{ user.mobile }})
               </a-option>
             </a-select>
           </a-form-item>
-          
+
           <!-- <a-form-item label="发放数量">
             <a-input-number
               v-model="distributeForm.quantity"
@@ -75,13 +65,9 @@
               style="width: 100%;"
             />
           </a-form-item> -->
-          
+
           <a-form-item label="备注">
-            <a-textarea
-              v-model="distributeForm.remark"
-              placeholder="发放备注（可选）"
-              :rows="3"
-            />
+            <a-textarea v-model="distributeForm.remark" placeholder="发放备注（可选）" :rows="3" />
           </a-form-item>
         </a-form>
       </div>
@@ -165,7 +151,7 @@ const columns = reactive([
 ])
 
 // 页面数据初始化
-const initPage = async () => {}
+const initPage = async () => { }
 
 // SaTable 数据请求
 const refresh = async () => {
@@ -198,9 +184,9 @@ const loadUsers = async (keyword = '') => {
   userLoading.value = true
   try {
     // 这里需要调用用户API，暂时使用模拟数据
-    const result = await userApi.getPageList({ nickname:keyword })
+    const result = await userApi.getPageList({ nickname: keyword })
     userList.value = result.data.data || []
-    
+
     // 模拟用户数据
     // userList.value = [
     //   { id: 1, nickname: '用户1', phone: '13800138001', email: 'user1@example.com' },
@@ -226,7 +212,7 @@ const handleDistribute = async () => {
     Message.warning('请选择要发放的用户')
     return
   }
-  
+
   try {
     // 这里调用您自己写的发放接口
     const params = {
@@ -235,18 +221,18 @@ const handleDistribute = async () => {
       quantity: distributeForm.value.quantity,
       remark: distributeForm.value.remark
     }
-    
+
     // 示例API调用（需要您实现具体的API）
     const result = await api.distributeCoupon(params)
     if (result.code === 200) {
       Message.success('优惠券发放成功')
       closeDistributeModal()
     }
-    
+
     // 发放成功提示
     Message.success(`已向 ${distributeForm.value.user_ids.length} 个用户发放优惠券，每人 ${distributeForm.value.quantity} 张`)
     closeDistributeModal()
-    
+
   } catch (error) {
     Message.error('发放失败')
     console.error(error)
