@@ -29,7 +29,7 @@
           <template #icon><icon-eye /></template>
           查看详情
         </a-button>
-        <a-button v-if="record.status === 1 && record.payStatus === 1" type="text" size="small"
+        <a-button v-if="record.status === 1 && record.payStatus === 1 && !record.billCode" type="text" size="small"
           @click="showShippingModal(record)" style="color: #00b42a;">
           <template #icon>
             <sa-icon icon="bi:handbag" />
@@ -99,7 +99,7 @@
             ¥{{ selectedOrder.totalPrice }}
           </a-descriptions-item>
           <a-descriptions-item label="订单状态">
-            已确认
+            {{ selectedOrder.status == 1 ? '待发货' : '已发货' }}
           </a-descriptions-item>
         </a-descriptions>
 
@@ -140,7 +140,7 @@
             </a-col>
           </a-row>
 
-          <a-form-item label="物品重量(kg)">
+          <!-- <a-form-item label="物品重量(kg)">
             <a-input-number v-model="shippingForm.weight" :min="0.1" :step="0.1" placeholder="请输入物品重量"
               style="width: 100%;" />
           </a-form-item>
@@ -151,7 +151,7 @@
 
           <a-form-item label="备注">
             <a-textarea v-model="shippingForm.remark" placeholder="发货备注（可选）" :rows="2" />
-          </a-form-item>
+          </a-form-item> -->
         </a-form>
       </div>
     </a-modal>
@@ -305,18 +305,19 @@ const closeDetails = () => {
 
 // 显示发货弹窗
 const showShippingModal = (record) => {
+  console.log(record)
   selectedOrder.value = record
   // 重置表单
   shippingForm.value = {
-    receiver_name: '',
-    receiver_phone: '',
-    receiver_address: '',
-    province: '',
-    city: '',
-    district: '',
-    weight: 0.5,
-    goods_desc: '打印文件',
-    remark: ''
+    receiver_name: record.address.consignee,
+    receiver_phone: record.address.mobile,
+    receiver_address: record.address.region.detail,
+    province: record.address.region.province,
+    city: record.address.region.city,
+    district: record.address.region.district,
+    // weight: 0.5,
+    // goods_desc: '打印文件',
+    // remark: ''
   }
   shippingVisible.value = true
 }
@@ -352,21 +353,21 @@ const handleShipping = async () => {
         city: shippingForm.value.city,
         district: shippingForm.value.district
       },
-      goods: {
-        weight: shippingForm.value.weight,
-        description: shippingForm.value.goods_desc
-      },
-      remark: shippingForm.value.remark
+      // goods: {
+      //   weight: shippingForm.value.weight,
+      //   description: shippingForm.value.goods_desc
+      // },
+      // remark: shippingForm.value.remark
     }
 
     // 调用中通物流电子面单API
-    const response = await shippingApi.createZTOWaybill(shippingData)
+    const response = await api.handleShipping(shippingData)
 
     if (response.code !== 200) {
       throw new Error(response.message || '创建电子面单失败')
     }
 
-    Message.success('发货成功！快递单号将通过短信发送给用户')
+    Message.success('发货成功！')
     closeShippingModal()
 
     // 刷新列表

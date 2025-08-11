@@ -1,20 +1,13 @@
 <template>
-  <component
-    is="a-modal"
-    :width="tool.getDevice() === 'mobile' ? '100%' : '600px'"
-    v-model:visible="visible"
-    :title="title"
-    :mask-closable="false"
-    :ok-loading="loading"
-    @cancel="close"
-    @before-ok="submit">
+  <component is="a-modal" :width="tool.getDevice() === 'mobile' ? '100%' : '600px'" v-model:visible="visible"
+    :title="title" :mask-closable="false" :ok-loading="loading" @cancel="close" @before-ok="submit">
     <!-- 表单信息 start -->
     <a-form ref="formRef" :model="formData" :rules="rules" :auto-label-width="true">
       <a-form-item label="昵称" field="nickname">
         <a-input v-model="formData.nickname" placeholder="请输入昵称" />
       </a-form-item>
       <a-form-item label="头像" field="avatar">
-        <sa-upload-image v-model="formData.avatar"  :multiple="false" />
+        <sa-upload-image v-model="formData.avatar" :multiple="false" />
       </a-form-item>
       <a-form-item label="手机号" field="mobile">
         <a-input v-model="formData.mobile" placeholder="请输入手机号" />
@@ -28,9 +21,9 @@
       <a-form-item label="年龄" field="age">
         <a-input v-model="formData.age" placeholder="请输入年龄" />
       </a-form-item> -->
-      <a-form-item label="注册时间" field="regist_time">
+      <!-- <a-form-item label="注册时间" field="regist_time">
         <a-date-picker v-model="formData.regist_time" :show-time="true" mode="date" placeholder="请选择注册时间" />
-      </a-form-item>
+      </a-form-item> -->
     </a-form>
     <!-- 表单信息 end -->
   </component>
@@ -89,7 +82,7 @@ const open = async (type = 'add') => {
 }
 
 // 初始化页面数据
-const initPage = async () => {}
+const initPage = async () => { }
 
 // 设置数据
 const setFormData = async (data) => {

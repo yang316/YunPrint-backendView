@@ -74,5 +74,15 @@ export default {
       method: 'get'
     })
   },
+  /**
+   * 中通物流发货
+   */
+  handleShipping(data){
+    return request({
+      url: '/backend/order/Order/handleShipping',
+      method: 'post',
+      data
+    })
+  }
 
 }
