@@ -64,4 +64,17 @@ export default {
     })
   },
 
+  /**
+   * 审核提现申请
+   * @param {Object} data 审核数据
+   * @returns
+   */
+  audit(data = {}) {
+    return request({
+      url: '/backend/AmountLog/AmountLog/audit',
+      method: 'post',
+      data
+    })
+  },
+
 }

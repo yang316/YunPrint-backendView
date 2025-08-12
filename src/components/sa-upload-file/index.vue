@@ -1,17 +1,12 @@
 <template>
   <div>
     <div class="upload-file w-full">
-      <a-upload
-        :custom-request="uploadFileHandler"
-        :show-file-list="false"
-        :multiple="props.multiple"
-        :accept="props.accept"
-        :disabled="isDisabled"
-        :tip="props.tip"
-        :draggable="props.draggable">
+      <a-upload :custom-request="uploadFileHandler" :show-file-list="false" :multiple="props.multiple"
+        :accept="props.accept" :disabled="isDisabled" :tip="props.tip" :draggable="props.draggable">
         <template #upload-button v-if="props.draggable">
           <slot name="customer">
-            <div style="background-color: var(--color-fill-2); border: 1px dashed var(--color-fill-4)" class="rounded text-center p-7 w-full">
+            <div style="background-color: var(--color-fill-2); border: 1px dashed var(--color-fill-4)"
+              class="rounded text-center p-7 w-full">
               <div>
                 <icon-upload class="text-5xl text-gray-400" />
                 <div class="text-red-600 font-bold">
@@ -61,7 +56,7 @@ import { Message } from '@arco-design/web-vue'
 const props = defineProps({
   modelValue: {
     type: [String, Number, Array],
-    default: () => {},
+    default: () => { },
   },
   showList: { type: Boolean, default: true },
   draggable: { type: Boolean, default: false },
@@ -69,7 +64,7 @@ const props = defineProps({
   disabled: { type: Boolean, default: false },
   title: { type: String, default: '本地上传' },
   icon: { type: String, default: 'icon-plus' },
-  size: { type: Number, default: 4 * 1024 * 1024 },
+  size: { type: Number, default: 10 * 1024 * 1024 },
   limit: { type: Number, default: 0 },
   mode: { type: String, default: 'system' },
   tip: { type: String, default: undefined },

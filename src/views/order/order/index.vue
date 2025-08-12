@@ -57,27 +57,63 @@
             <a-descriptions-item label="份数">
               {{ item.copies }}
             </a-descriptions-item>
-            <a-descriptions-item label="单价">
+            <!-- <a-descriptions-item label="单价">
               ¥{{ item.paperPrice }}
-            </a-descriptions-item>
+            </a-descriptions-item> -->
             <a-descriptions-item label="总价">
               ¥{{ item.totalPrice }}
             </a-descriptions-item>
-            <a-descriptions-item label="附件ID">
+            <!-- <a-descriptions-item label="附件ID">
               {{ item.atta_id }}
-            </a-descriptions-item>
+            </a-descriptions-item> -->
           </a-descriptions>
 
           <!-- 打印选项 -->
           <div style="margin-top: 16px;">
-            <h4>打印选项:</h4>
-            <a-row :gutter="16">
-              <a-col v-for="option in item.options" :key="option.type" :span="8">
-                <a-tag color="blue">{{ option.name }}</a-tag>
-                <span v-if="option.price > 0"> (+¥{{ option.price }})</span>
-              </a-col>
-            </a-row>
+            <h4 style="margin-bottom: 12px; color: #1d2129; font-weight: 600;">打印选项</h4>
+            <div v-if="item.options && item.options.length > 0"
+              style="background: #f7f8fa; padding: 16px; border-radius: 6px;">
+              <a-space wrap :size="[12, 8]">
+                <div v-for="option in item.options" :key="option.type"
+                  style="display: flex; align-items: center; background: white; padding: 8px 12px; border-radius: 4px; border: 1px solid #e5e6eb;">
+                  <a-tag :color="getOptionColor(option.type)" style="margin: 0; margin-right: 8px; border-radius: 4px;">
+                    {{ option.name }}
+                  </a-tag>
+                  <!-- <span style="color: #4e5969; font-size: 13px;">{{ option.value }}</span> -->
+                </div>
+              </a-space>
+
+              <!-- 特殊内容展示 -->
+              <div v-if="item.coverText || item.coverUrl"
+                style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e6eb;">
+                <!-- 文字封面内容 -->
+                <div v-if="item.coverText" style="margin-bottom: 12px;">
+                  <div
+                    style="color: #1d2129; font-weight: 500; margin-bottom: 8px; display: flex; align-items: center;">
+                    <a-tag color="orange" style="margin-right: 8px;">封面文字</a-tag>
+                  </div>
+                  <div
+                    style="background: white; padding: 12px; border-radius: 4px; border: 1px solid #e5e6eb; color: #4e5969; line-height: 1.5;">
+                    {{ item.coverText }}
+                  </div>
+                </div>
+
+                <!-- 图片封面展示 -->
+                <div v-if="item.coverUrl">
+                  <div
+                    style="color: #1d2129; font-weight: 500; margin-bottom: 8px; display: flex; align-items: center;">
+                    <a-tag color="purple" style="margin-right: 8px;">封面图片</a-tag>
+                  </div>
+                  <div
+                    style="background: white; padding: 12px; border-radius: 4px; border: 1px solid #e5e6eb; text-align: center;">
+                    <a-image :src="item.coverUrl" style="max-width: 200px; max-height: 200px; border-radius: 4px;" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <a-empty v-else description="暂无打印选项" size="small" style="margin: 20px 0;" />
           </div>
+
         </a-card>
       </div>
       <a-empty v-else description="暂无订单项数据" />
@@ -124,17 +160,17 @@
 
           <a-row :gutter="16">
             <a-col :span="8">
-              <a-form-item label="省份">
+              <a-form-item label="省份" required>
                 <a-input v-model="shippingForm.province" placeholder="省份" />
               </a-form-item>
             </a-col>
             <a-col :span="8">
-              <a-form-item label="城市">
+              <a-form-item label="城市" required>
                 <a-input v-model="shippingForm.city" placeholder="城市" />
               </a-form-item>
             </a-col>
             <a-col :span="8">
-              <a-form-item label="区县">
+              <a-form-item label="区县" required>
                 <a-input v-model="shippingForm.district" placeholder="区县" />
               </a-form-item>
             </a-col>
@@ -305,16 +341,16 @@ const closeDetails = () => {
 
 // 显示发货弹窗
 const showShippingModal = (record) => {
-  console.log(record)
+  // console.log(record)
   selectedOrder.value = record
   // 重置表单
   shippingForm.value = {
-    receiver_name: record.address.consignee,
-    receiver_phone: record.address.mobile,
-    receiver_address: record.address.region.detail,
-    province: record.address.region.province,
-    city: record.address.region.city,
-    district: record.address.region.district,
+    receiver_name: record.address?.consignee || '',
+    receiver_phone: record.address?.mobile || '',
+    receiver_address: record.address?.region?.detail || '',
+    province: record.address?.region?.province || '',
+    city: record.address?.region?.city || '',
+    district: record.address?.region?.district || '',
     // weight: 0.5,
     // goods_desc: '打印文件',
     // remark: ''
@@ -333,7 +369,12 @@ const handleShipping = async () => {
   if (!selectedOrder.value) return
 
   // 表单验证
-  if (!shippingForm.value.receiver_name || !shippingForm.value.receiver_phone || !shippingForm.value.receiver_address) {
+  if (!shippingForm.value.receiver_name ||
+    !shippingForm.value.receiver_phone ||
+    !shippingForm.value.province ||
+    !shippingForm.value.city ||
+    !shippingForm.value.district ||
+    !shippingForm.value.receiver_address) {
     Message.error('请填写完整的收货信息')
     return
   }
@@ -379,6 +420,22 @@ const handleShipping = async () => {
   } finally {
     shippingLoading.value = false
   }
+}
+
+// 获取选项颜色
+const getOptionColor = (optionType) => {
+  const colorMap = {
+    'paperSize': 'blue',
+    'paperType': 'green',
+    'printSide': 'cyan',
+    'printColor': 'magenta',
+    'binding': 'gold',
+    'coverContent': 'orange',
+    'orientation': 'purple',
+    'quality': 'red',
+    'copies': 'lime'
+  }
+  return colorMap[optionType] || 'blue'
 }
 
 // 页面加载完成执行

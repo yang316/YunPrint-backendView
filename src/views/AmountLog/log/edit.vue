@@ -13,10 +13,7 @@
         <a-input v-model="formData.amount" placeholder="请输入变动余额" />
       </a-form-item>
       <a-form-item label="类型" field="type">
-        <a-select placeholder="请选择类型" v-model="formData.type" allow-clear>
-          <a-option value="0" label="收益" />
-          <a-option value="2" label="提现" />
-        </a-select>
+        <a-select placeholder="请选择类型" v-model="formData.type" :options="typeOptions" allow-clear />
       </a-form-item>
       <a-form-item label="备注" field="remark">
         <a-input v-model="formData.remark" placeholder="请输入备注" />
@@ -53,6 +50,18 @@ const initialFormData = {
   type: null,
   remark: '',
 }
+
+// 类型选项
+const typeOptions = ref([
+  {
+    value: 0,
+    label: '收益',
+  },
+  {
+    value: 1,
+    label: '提现',
+  },
+])
 
 // 表单信息
 const formData = reactive({ ...initialFormData })
