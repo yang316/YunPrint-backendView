@@ -38,9 +38,9 @@
 
       <!-- 状态渲染 -->
       <template #status="{ record }">
-        <a-tag v-if="record.status === 0" color="orange">待审核</a-tag>
-        <a-tag v-else-if="record.status === 1" color="green">已通过</a-tag>
-        <a-tag v-else-if="record.status === 2" color="red">已拒绝</a-tag>
+        <a-tag v-if="record.status === 0 && record.type == 1" color="orange">待审核</a-tag>
+        <a-tag v-else-if="record.status === 1 || record.type == 0" color="green">已通过</a-tag>
+        <a-tag v-else-if="record.status === 2 && record.type == 1" color="red">已拒绝</a-tag>
       </template>
 
       <!-- 图片渲染 -->
