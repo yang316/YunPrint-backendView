@@ -32,6 +32,9 @@
         <sa-radio v-model="formData.payStatus" dict="payStatus"></sa-radio>
         <!-- <a-input v-model="formData.payStatus" placeholder="请输入支付状态" /> -->
       </a-form-item>
+      <a-form-item label="快递单号" field="billCode">
+        <a-input v-model="formData.billCode" placeholder="请输入快递单号" />
+      </a-form-item>
     </a-form>
     <!-- 表单信息 end -->
 

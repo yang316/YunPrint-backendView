@@ -1,6 +1,7 @@
 <template>
   <div class="ma-content-block">
-    <sa-table ref="crudRef" :options="options" :columns="columns" :searchForm="searchForm">
+    <sa-table ref="crudRef" :options="options" :columns="columns" :searchForm="searchForm"
+      @selection-change="selectionChange">
       <!-- 搜索区 tableSearch -->
       <template #tableSearch>
         <a-col :sm="8" :xs="24">
@@ -22,7 +23,13 @@
           </a-form-item>
         </a-col>
       </template>
-
+      <!-- 添加自定义工具栏按钮 -->
+      <template #tools>
+        <a-button type="primary" @click="handleExport" :loading="exportLoading" :disabled="selections.length === 0">
+          <template #icon><icon-download /></template>
+          导出选中数据
+        </a-button>
+      </template>
       <!-- Table 自定义渲染 -->
       <template #operationBeforeExtend="{ record }">
         <a-button type="text" size="small" @click="showOrderDetails(record.id)">
@@ -49,7 +56,10 @@
           style="margin-bottom: 16px;">
           <a-descriptions :column="2" bordered>
             <a-descriptions-item label="文件名">
-              {{ item.fileName }}
+              <a-link :href="item.fileUrl" :download="item.fileName"  target="_blank">
+                {{ item.fileName }}
+              </a-link>
+
             </a-descriptions-item>
             <a-descriptions-item label="总页数">
               {{ item.totalPage }}
@@ -196,12 +206,11 @@
 </template>
 
 <script setup>
-import { onMounted, ref, reactive } from 'vue'
+import { onMounted, ref, reactive, computed } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import EditForm from './edit.vue'
 import api from '../api/order'
 import userApi from '../../user/api/user'
-import shippingApi from '../api/shipping'
 
 // 引用定义
 const crudRef = ref()
@@ -210,10 +219,108 @@ const viewRef = ref()
 // 订单详情相关
 const detailVisible = ref(false)
 const orderItems = ref([])
-const detailLoading = ref(false)
 const userList = ref([])
 const userLoading = ref(false)
+const exportLoading = ref(false)
+const selections = ref([])
+const selectionChange = (row) => {
+  selections.value = row
+}
+// 添加导出方法
+const handleExport = async () => {
+  if (selections.value.length === 0) {
+    Message.warning('请先选择要导出的数据')
+    return
+  }
 
+  exportLoading.value = true
+  const ids = selections.value.join(',')
+  searchForm.value.ids = ids
+
+  try {
+    // 1. 发起请求，获取二进制数据
+    const resp = await api.export(searchForm.value)
+
+    // 2. 服务器返回的数据实际上已经是正确的Excel数据
+    // 关键问题: resp.data是一个包含二进制数据的字符串表示，不是Blob对象
+    // 需要从resp.data.data提取二进制内容并创建正确的Blob
+
+    let excelData
+    if (resp.data && typeof resp.data === 'object' && resp.data.data) {
+      // 处理嵌套在data属性中的二进制数据
+      excelData = resp.data.data
+    } else {
+      // 如果已经是blob则直接使用
+      excelData = resp.data
+    }
+
+    // 3. 创建正确的Blob对象
+    const blob = new Blob([excelData], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    })
+
+    // 4. 解析文件名
+    let fileName = '订单导出.xlsx'
+
+    // 获取正确的headers，可能在resp.headers或resp.data.headers中
+    const headers = resp.headers || (resp.data && resp.data.headers)
+
+    if (headers && headers['content-disposition']) {
+      const match = headers['content-disposition'].match(/filename="([^"]+)"/)
+      if (match && match[1]) {
+        fileName = decodeURIComponent(match[1])
+      }
+    }
+
+    // 5. 创建下载链接
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.style.display = 'none'
+    a.href = url
+    a.download = fileName
+
+    // 6. 触发下载
+    document.body.appendChild(a)
+    a.click()
+
+    // 7. 清理资源
+    window.setTimeout(() => {
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    }, 100)
+
+    Message.success('导出成功')
+  } catch (error) {
+    console.error('导出失败:', error)
+    Message.error('导出失败，请重试')
+  } finally {
+    exportLoading.value = false
+  }
+}
+
+
+
+const downloadFile = (fileStream, fileName, mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') => {
+  // 创建Blob对象
+  const blob = new Blob([fileStream], { type: mimeType });
+
+  // 创建临时下载链接
+  const downloadUrl = window.URL.createObjectURL(blob);
+
+  // 创建虚拟链接元素
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.setAttribute('download', fileName);
+
+  // 触发下载
+  document.body.appendChild(link);
+  link.click();
+
+  // 清理资源
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(downloadUrl);
+}
+// )
 // 发货相关
 const shippingVisible = ref(false)
 const selectedOrder = ref(null)
@@ -237,12 +344,14 @@ const searchForm = ref({
   status: '',
   status: '',
   user_id: '',
+  ids: ''
 })
 
 // SaTable 基础配置
 const options = reactive({
   api: api.getPageList,
-  rowSelection: { showCheckedAll: true },
+  // rowSelection: undefined,
+  rowSelection: { showCheckedAll: true, },
   add: {
     show: false,
     auth: ['/backend/order/Order/save'],
@@ -269,6 +378,7 @@ const options = reactive({
       }
     },
   },
+
   operationColumn: {
     width: 200,
   },

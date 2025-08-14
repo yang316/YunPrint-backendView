@@ -76,5 +76,12 @@ export default {
       data
     })
   },
-
+  // 获取佣金支出统计数据
+  getCommissionStatistics(params) {
+    return request({
+      url: '/backend/AmountLog/AmountLog/commissionStatistics',
+      method: 'get',
+      params
+    })
+  }
 }

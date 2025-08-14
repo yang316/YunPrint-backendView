@@ -15,9 +15,9 @@
       <a-form-item label="类型" field="type">
         <a-select placeholder="请选择类型" v-model="formData.type" :options="typeOptions" allow-clear />
       </a-form-item>
-      <a-form-item label="备注" field="remark">
+      <!-- <a-form-item label="备注" field="remark">
         <a-input v-model="formData.remark" placeholder="请输入备注" />
-      </a-form-item>
+      </a-form-item> -->
     </a-form>
     <!-- 表单信息 end -->
   </component>

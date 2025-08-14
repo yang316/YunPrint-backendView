@@ -5,8 +5,15 @@
     <a-form ref="formRef" :model="formData" :rules="rules" :auto-label-width="true">
       <a-form-item label="轮播图" field="images">
         <sa-upload-image v-model="formData.images" :limit="3" :multiple="true" />
+
       </a-form-item>
     </a-form>
+    <a-alert type="normal">
+      <template #icon>
+        <icon-exclamation-circle-fill />
+      </template>
+      轮播图规格：375*360
+    </a-alert>
     <!-- 表单信息 end -->
   </component>
 </template>
@@ -39,7 +46,9 @@ const formData = reactive({ ...initialFormData })
 
 // 验证规则
 const rules = {
-
+  images: [
+    { required: true, message: '请上传轮播图' },
+  ],
 }
 
 // 打开弹框

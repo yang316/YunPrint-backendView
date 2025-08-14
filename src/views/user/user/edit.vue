@@ -9,8 +9,11 @@
       <a-form-item label="头像" field="avatar">
         <sa-upload-image v-model="formData.avatar" :multiple="false" />
       </a-form-item>
-      <a-form-item label="手机号" field="mobile">
+      <!-- <a-form-item label="手机号" field="mobile">
         <a-input v-model="formData.mobile" placeholder="请输入手机号" />
+      </a-form-item> -->
+      <a-form-item label="状态" field="status">
+        <sa-switch v-model="formData.status" checkedValue="1" uncheckedValue="0" checkedText="正常" uncheckedText="禁用" />
       </a-form-item>
       <!-- <a-form-item label="密码" field="password">
         <a-input v-model="formData.password" placeholder="请输入密码" />
@@ -56,6 +59,7 @@ const initialFormData = {
   gender: null,
   age: null,
   regist_time: '',
+  status:1,
 }
 
 // 表单信息
@@ -66,6 +70,7 @@ const rules = {
   nickname: [{ required: true, message: '昵称必需填写' }],
   avatar: [{ required: true, message: '头像必需填写' }],
   // mobile: [{ required: true, message: '手机号必需填写' }],
+  status: [{ required: true, message: '状态必需填写' }],
   // password: [{ required: true, message: '密码必需填写' }],
   // gender: [{ required: true, message: '性别必需填写' }],
   // age: [{ required: true, message: '年龄必需填写' }],

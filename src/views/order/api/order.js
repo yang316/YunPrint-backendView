@@ -83,6 +83,40 @@ export default {
       method: 'post',
       data
     })
-  }
+  },
+  /**
+   * 添加数据
+   * @returns
+   */
+  export(params = {}) {
+    return request({
+      url: '/backend/order/Order/export',
+      method: 'post',
+      data: params,
+      responseType: 'blob'
+    })
+  },
+  // 获取订单统计数据
+  getOrderStatistics(params) {
+    return request({
+      url: '/backend/order/Order/orderStatistics',
+      method: 'get',
+      params
+    })
+  },
+
+
+
+  // 获取销售额统计数据
+  getSalesStatistics(params) {
+    return request({
+      url: '/backend/order/Order/getSalesStatistics',
+      method: 'get',
+      params
+    })
+  },
+
+
+
 
 }

@@ -10,6 +10,10 @@
         </a-col>
       </template>
 
+      <template #status="{ record }">
+        <sa-switch v-model="record.status" checkedValue="1" uncheckedValue="0" checkedText="正常" uncheckedText="禁用"
+          @change="changeStatus(record.status == 1 ? 0 : 1, record.id)"></sa-switch>
+      </template>
       <!-- Table 自定义渲染 -->
     </sa-table>
 
@@ -69,14 +73,27 @@ const options = reactive({
 
 // SaTable 列配置
 const columns = reactive([
+  { title: 'ID', dataIndex: 'id', width: 180 },
   { title: '昵称', dataIndex: 'nickname', width: 180 },
   { title: '头像', dataIndex: 'avatar', type: 'image', width: 120 },
-  { title: '手机号', dataIndex: 'mobile', width: 180 },
+  { title: '状态', dataIndex: 'status', width: 200 },
+  // { title: '手机号', dataIndex: 'mobile', width: 180 },
   // { title: '密码', dataIndex: 'password', width: 180 },
   // { title: '性别', dataIndex: 'gender', type: 'dict', dict: 'gender', width: 120 },
   // { title: '年龄', dataIndex: 'age', width: 180 },
   { title: '注册时间', dataIndex: 'regist_time', width: 180 },
 ])
+
+// 状态切换
+const changeStatus = async (status, id) => {
+  console.log(status)
+  console.log(id)
+  const response = await api.changeStatus({ id: id, status: status })
+  if (response.code === 200) {
+    Message.success(response.message)
+    crudRef.value.refresh()
+  }
+}
 
 // 页面数据初始化
 const initPage = async () => {}

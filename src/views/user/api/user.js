@@ -64,4 +64,24 @@ export default {
     })
   },
 
+  /**
+   * 状态切换
+   * @returns
+   */
+  changeStatus(data) {
+    return request({
+      url: '/backend/user/User/changeStatus',
+      method: 'put',
+      data
+    })
+  },
+
+  // 获取用户增长统计数据
+  getUserGrowthStatistics(params) {
+    return request({
+      url: '/backend/user/User/userGrowthStatistics',
+      method: 'get',
+      params
+    })
+  }
 }

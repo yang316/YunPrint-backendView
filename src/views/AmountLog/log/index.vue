@@ -98,9 +98,9 @@
             </a-radio-group>
           </a-form-item>
 
-          <!-- <a-form-item label="审核备注">
+          <a-form-item label="审核备注">
             <a-textarea v-model="auditForm.remark" placeholder="请输入审核备注（可选）" :rows="3" />
-          </a-form-item> -->
+          </a-form-item>
         </a-form>
       </div>
     </a-modal>
@@ -222,7 +222,8 @@ const showAuditModal = (record) => {
   auditForm.value = {
     status: 1,
     remark: '',
-    user_id: record.user_id
+    user_id: record.user_id,
+    amount: record.amount
   }
   auditVisible.value = true
 }
@@ -243,7 +244,9 @@ const handleAudit = async () => {
     const auditData = {
       id: selectedRecord.value.id,
       status: auditForm.value.status,
-      // remark: auditForm.value.remark
+      user_id: auditForm.value.user_id,
+      remark: auditForm.value.remark,
+      amount: auditForm.value.amount
     }
 
     // 调用审核API
