@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia'
 
 let defaultConfig = {
-  site_name: 'SaiAdmin',
+  site_name: '马上云印',
   site_keywords: '',
   site_desc: '',
   site_record_number: '',
