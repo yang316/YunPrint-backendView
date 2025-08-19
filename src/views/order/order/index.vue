@@ -56,7 +56,7 @@
           style="margin-bottom: 16px;">
           <a-descriptions :column="2" bordered>
             <a-descriptions-item label="文件名">
-              <a-link :href="item.fileUrl" :download="item.fileName"  target="_blank">
+              <a-link :href="item.fileUrl" :download="item.fileName" target="_blank">
                 {{ item.fileName }}
               </a-link>
 
@@ -73,14 +73,35 @@
             <a-descriptions-item label="总价">
               ¥{{ item.totalPrice }}
             </a-descriptions-item>
+            <a-descriptions-item label="打印页数">
+              {{ item.selectPage.start }} - {{ item.selectPage.end }}
+            </a-descriptions-item>
             <!-- <a-descriptions-item label="附件ID">
               {{ item.atta_id }}
             </a-descriptions-item> -->
           </a-descriptions>
 
+          <!-- 打印规格 -->
+          <div style="margin-top: 16px;">
+            <h4 style="margin-bottom: 12px; color: #1d2129; font-weight: 600;">打印规格</h4>
+            <div v-if="item.skuInfo && item.skuInfo.length > 0"
+              style="background: #f7f8fa; padding: 16px; border-radius: 6px;">
+              <a-space wrap :size="[12, 8]">
+                <div v-for="sku in item.skuInfo" :key="sku.id"
+                  style="display: flex; align-items: center; background: white; padding: 8px 12px; border-radius: 4px; border: 1px solid #e5e6eb;">
+                  <a-tag :color="getOptionColor(sku.sku_id)" style="margin: 0; margin-right: 8px; border-radius: 4px;">
+                    {{ sku.name }}
+                  </a-tag>
+
+                </div>
+              </a-space>
+            </div>
+            <a-empty v-else description="暂无打印选项" size="small" style="margin: 20px 0;" />
+          </div>
+
           <!-- 打印选项 -->
           <div style="margin-top: 16px;">
-            <h4 style="margin-bottom: 12px; color: #1d2129; font-weight: 600;">打印选项</h4>
+            <h4 style="margin-bottom: 12px; color: #1d2129; font-weight: 600;">装订选项</h4>
             <div v-if="item.options && item.options.length > 0"
               style="background: #f7f8fa; padding: 16px; border-radius: 6px;">
               <a-space wrap :size="[12, 8]">
@@ -115,8 +136,10 @@
                     <a-tag color="purple" style="margin-right: 8px;">封面图片</a-tag>
                   </div>
                   <div
-                    style="background: white; padding: 12px; border-radius: 4px; border: 1px solid #e5e6eb; text-align: center;">
-                    <a-image :src="item.coverUrl" style="max-width: 200px; max-height: 200px; border-radius: 4px;" />
+                    style="background: white; padding: 12px; border-radius: 4px; border: 1px solid #e5e6eb; text-align: center; overflow: hidden;">
+                    <a-image :src="item.coverUrl"
+                      style="max-width: 100%; max-height: 100%; width: auto; height: auto; border-radius: 4px; object-fit: contain;"
+                      :preview="true" />
                   </div>
                 </div>
               </div>
@@ -543,7 +566,11 @@ const getOptionColor = (optionType) => {
     'coverContent': 'orange',
     'orientation': 'purple',
     'quality': 'red',
-    'copies': 'lime'
+    'copies': 'lime',
+    1: 'orange',
+    4: 'purple',
+    5: 'red',
+    6: 'lime',
   }
   return colorMap[optionType] || 'blue'
 }

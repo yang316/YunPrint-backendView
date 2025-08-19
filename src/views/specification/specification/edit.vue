@@ -8,11 +8,11 @@
             <a-input v-model="form.name" placeholder="请输入规格名称" />
           </a-form-item>
         </a-col>
-        <a-col :span="12">
+        <!-- <a-col :span="12">
           <a-form-item label="排序" field="sort">
             <a-input-number v-model="form.sort" placeholder="排序值" :min="0" />
           </a-form-item>
-        </a-col>
+        </a-col> -->
       </a-row>
 
 
@@ -41,17 +41,17 @@
                 <!-- <a-col :span="4">
                   <a-input-number v-model="item.price" placeholder="价格" :min="0" :precision="2" />
                 </a-col> -->
-                <a-col :span="4" label="2">
+                <!-- <a-col :span="4" label="2">
                   <a-form-item label="排序" field="sort">
                     <a-input-number v-model="item.sort" default="index" placeholder="排序" :min="0" />
                   </a-form-item>
-                </a-col>
-                <a-col :span="4">
+                </a-col> -->
+                <!-- <a-col :span="4">
                   <a-form-item label="状态" field="status">
                     <sa-switch v-model="item.status" type="round" checkedValue="1" uncheckedValue="0" checkedText="启用"
                       uncheckedText="禁用"></sa-switch>
                   </a-form-item>
-                </a-col>
+                </a-col> -->
                 <!-- <a-col :span="6">
                   <a-input v-model="item.description" placeholder="描述" />
                 </a-col> -->

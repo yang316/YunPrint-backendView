@@ -2,7 +2,7 @@
   <div class="ma-content-block">
     <sa-table ref="crudRef" :options="options" :columns="columns" :searchForm="searchForm">
       <!-- 搜索区 tableSearch -->
-      <template #tableSearch>
+      <!-- <template #tableSearch>
         <a-col :sm="8" :xs="24">
           <a-form-item label="规格分类" field="category">
             <sa-select v-model="searchForm.category" dict="specification_category" placeholder="请选择规格分类" allow-clear />
@@ -23,7 +23,7 @@
             <a-range-picker v-model="searchForm.create_time" :show-time="true" mode="date" />
           </a-form-item>
         </a-col>
-      </template>
+      </template> -->
 
       <template #tableAfterButtons>
         <!-- 设置价格功能 -->
@@ -95,14 +95,14 @@
               </template>
             </a-table-column>
 
-            <a-table-column title="状态">
+            <!-- <a-table-column title="状态">
               <template #cell="{ record }">
                 <sa-switch v-model="record.status" checkedValue="1" uncheckedValue="0" checkedText="启用"
                   uncheckedText="禁用" />
 
               </template>
-            </a-table-column>
-            <a-table-column title="操作" :width="180">
+            </a-table-column> -->
+            <!-- <a-table-column title="操作" :width="180">
               <template #cell="{ record }">
                 <a-space>
                   <a-button type="text" size="small" @click="setDefaultCombination(record)"
@@ -112,13 +112,13 @@
                       <icon-star v-else />
                     </template>
                     {{ isDefaultCombination(record) ? '取消默认' : '设为默认' }}
-                  </a-button>
-                  <!-- <a-button type="text" size="small" @click="resetCombinationPrice(record)">
+                  </a-button> -->
+            <!-- <a-button type="text" size="small" @click="resetCombinationPrice(record)">
                     重置
                   </a-button> -->
-                </a-space>
+            <!-- </a-space>
               </template>
-            </a-table-column>
+            </a-table-column> -->
             <!-- <a-table-column title="操作" width="120">
               <template #cell="{ record }">
                 <a-space>
@@ -181,7 +181,7 @@ const options = reactive({
   api: api.getPageList,
   rowSelection: { showCheckedAll: true },
   add: {
-    show: true,
+    show: false,
     auth: ['/backend/PrintSku/PrintSku/save'],
     func: async () => {
       editRef.value?.open()
@@ -196,7 +196,7 @@ const options = reactive({
     },
   },
   delete: {
-    show: true,
+    show: false,
     auth: ['/backend/PrintSku/PrintSku/destroy'],
     func: async (params) => {
       const resp = await api.destroy(params)
@@ -213,7 +213,7 @@ const columns = reactive([
   { title: 'ID', dataIndex: 'id', width: 60 },
   { title: '规格名称', dataIndex: 'name', width: 150 },
   { title: '规格值', dataIndex: 'specValues', width: 300, slotName: 'specValues' },
-  { title: '排序', dataIndex: 'sort', width: 80 },
+  // { title: '排序', dataIndex: 'sort', width: 80 },
   { title: '创建时间', dataIndex: 'create_time', width: 180 },
 ])
 

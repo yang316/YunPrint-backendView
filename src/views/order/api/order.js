@@ -35,7 +35,7 @@ export default {
    */
   update(id, data = {}) {
     return request({
-      url: '/order/Order/update?id=' + id,
+      url: '/backend/order/Order/update?id=' + id,
       method: 'put',
       data
     })
