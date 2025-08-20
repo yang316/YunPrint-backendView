@@ -82,7 +82,7 @@
                     {{ spec.valueName }}
                   </a-tag>
                   <!-- 默认标识 -->
-                  <a-tag v-if="isDefaultCombination(record)" color="gold" class="ml-2">
+                  <a-tag v-if="record.is_default == 1" color="gold" class="ml-2">
                     <template #icon><icon-star-fill /></template>
                     默认
                   </a-tag>
@@ -102,7 +102,7 @@
 
               </template>
             </a-table-column> -->
-            <!-- <a-table-column title="操作" :width="180">
+            <a-table-column title="操作" :width="180">
               <template #cell="{ record }">
                 <a-space>
                   <a-button type="text" size="small" @click="setDefaultCombination(record)"
@@ -112,13 +112,13 @@
                       <icon-star v-else />
                     </template>
                     {{ isDefaultCombination(record) ? '取消默认' : '设为默认' }}
-                  </a-button> -->
-            <!-- <a-button type="text" size="small" @click="resetCombinationPrice(record)">
+                  </a-button>
+                  <!-- <a-button type="text" size="small" @click="resetCombinationPrice(record)">
                     重置
                   </a-button> -->
-            <!-- </a-space>
+                </a-space>
               </template>
-            </a-table-column> -->
+            </a-table-column>
             <!-- <a-table-column title="操作" width="120">
               <template #cell="{ record }">
                 <a-space>
@@ -127,15 +127,15 @@
                   </a-button>
                   <a-button type="text" size="small" @click="copyCombinationPrice(record)">
                     复制
-                  </a-button> -->
-            <!-- </a-space>
-          </template> -->
-            <!-- </a-table-column> -->
+                  </a-button>
+                </a-space>
+              </template>
+            </a-table-column> -->
           </template>
         </a-table>
 
         <!-- 批量操作 -->
-        <!-- <div class="batch-operations" style="margin-top: 16px; padding: 16px; background: #f5f5f5; border-radius: 6px;">
+        <div class="batch-operations" style="margin-top: 16px; padding: 16px; background: #f5f5f5; border-radius: 6px;">
           <h4 style="margin-bottom: 12px;">批量操作</h4>
           <a-space wrap>
             <a-input-number v-model="batchCombinationPrice" :min="0" :precision="2" placeholder="批量价格"
@@ -143,11 +143,9 @@
               <template #prefix>¥</template>
             </a-input-number>
             <a-button @click="batchSetCombinationPrice">批量设置价格</a-button>
-            <a-button @click="batchResetCombinationPrice">批量重置为基础价格</a-button>
-            <a-button @click="batchEnableCombinations">批量启用</a-button>
-            <a-button @click="batchDisableCombinations">批量禁用</a-button>
+            <a-button @click="batchResetCombinationPrice">批量重置价格</a-button>
           </a-space>
-        </div> -->
+        </div>
 
       </div>
     </a-modal>
@@ -250,6 +248,11 @@ const setDefaultCombination = (record) => {
     record.is_default = null
     Message.success('已取消默认组合设置')
   } else {
+    // 先将所有组合的is_default设置为0
+    combinationList.value.forEach(item => {
+      item.is_default = 0
+    })
+
     // 设置新的默认组合
     defaultCombinationId.value = record.id
     record.is_default = 1
@@ -352,14 +355,15 @@ const saveCombinationPricing = async () => {
       status: item.status,
       combination_id: item.id,//组合ID
       specIds: item.specIds,//规格ID
+      is_default: item.is_default,
+
       //默认ID
 
     }))
 
     // 这里您可以调用实际的API接口
     const response = await api.updateCombinationPrices({
-      combinations: updateData,
-      default_id: defaultCombinationId.value
+      combinations: updateData
     })
 
     if (response.code === 200) {
