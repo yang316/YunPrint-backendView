@@ -1,10 +1,10 @@
 <template>
   <div class="ma-content-block lg:flex justify-between">
-    <div class="lg:w-2/12 pt-4 pl-2 pr-2">
+    <!-- <div class="lg:w-2/12 pt-4 pl-2 pr-2">
       <sa-tree-slider :data="depts" search-placeholder="搜索部门" @click="switchDept" v-model="defaultKey" />
-    </div>
+    </div> -->
 
-    <div class="lg:w-10/12 w-full">
+    <div>
       <!-- CRUD 组件 -->
       <sa-table ref="crudRef" :options="options" :columns="columns" :searchForm="searchForm" @resetSearch="handleReset">
         <!-- 搜索区 tableSearch -->
@@ -39,9 +39,7 @@
         <!-- Table 自定义渲染 -->
         <!-- 状态列 -->
         <template #status="{ record }">
-          <sa-switch
-            v-model="record.status"
-            :disabled="record.id == 1"
+          <sa-switch v-model="record.status" :disabled="record.id == 1"
             @change="changeStatus($event, record.id)"></sa-switch>
         </template>
         <!-- 头像列 -->

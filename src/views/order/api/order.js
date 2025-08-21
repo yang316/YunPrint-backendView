@@ -116,7 +116,16 @@ export default {
     })
   },
 
-
+  /**
+   * 处理退款
+   */
+  handleRefund(data) {
+    return request({
+      url: '/backend/order/Order/refund',
+      method: 'post',
+      data
+    })
+  }
 
 
 }

@@ -157,7 +157,7 @@ const options = reactive({
   api: api.getPageList,
   rowSelection: { showCheckedAll: true },
   add: {
-    show: true,
+    show: false,
     auth: ['/backend/AmountLog/AmountLog/save'],
     func: async () => {
       editRef.value?.open()
