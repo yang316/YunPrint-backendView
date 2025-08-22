@@ -36,8 +36,8 @@
           <template #icon><icon-eye /></template>
           查看详情
         </a-button>
-        <a-button v-if="record.status === 1 && record.payStatus === 1 && !record.billCode" type="text" size="small"
-          @click="showShippingModal(record)" style="color: #00b42a;">
+        <a-button v-if="record.status === 1 && record.payStatus === 1 && record.refundStatus != 2 && !record.billCode"
+          type="text" size="small" @click="showShippingModal(record)" style="color: #00b42a;">
           <template #icon>
             <sa-icon icon="bi:handbag" />
           </template>
@@ -57,27 +57,15 @@
     <edit-form ref="editRef" @success="refresh" />
 
     <!-- 退款审核组件 -->
-    <refund-modal 
-      :visible="refundVisible" 
-      @update:visible="refundVisible = $event"
-      :order-data="selectedRefundOrder" 
-      @success="handleRefundSuccess" 
-    />
+    <refund-modal :visible="refundVisible" @update:visible="refundVisible = $event" :order-data="selectedRefundOrder"
+      @success="handleRefundSuccess" />
 
     <!-- 发货组件 -->
-    <shipping-modal 
-      :visible="shippingVisible" 
-      @update:visible="shippingVisible = $event"
-      :order-data="selectedOrder" 
-      @success="handleShippingSuccess" 
-    />
+    <shipping-modal :visible="shippingVisible" @update:visible="shippingVisible = $event" :order-data="selectedOrder"
+      @success="handleShippingSuccess" />
 
     <!-- 订单详情组件 -->
-    <order-detail-modal 
-      :visible="detailVisible" 
-      @update:visible="detailVisible = $event"
-      :order-items="orderItems" 
-    />
+    <order-detail-modal :visible="detailVisible" @update:visible="detailVisible = $event" :order-items="orderItems" />
 
   </div>
 </template>
