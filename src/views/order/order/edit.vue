@@ -71,6 +71,7 @@ const initialFormData = {
   payType: 'wechat',
   status: 0,
   payStatus: 0,
+  billCode: '',
 }
 
 // 表单信息

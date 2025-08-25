@@ -1,6 +1,23 @@
 <template>
   <a-modal :visible="visible" @update:visible="handleVisibleChange" title="订单详情" :width="900" :footer="false"
     @cancel="handleCancel">
+    <!-- 全局操作栏 -->
+    <div v-if="flattenedOrderItems.length > 0" style="margin-bottom: 24px; padding: 16px; background: #f7f8fa; border-radius: 8px; border: 1px solid #e5e6eb;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h4 style="margin: 0; color: #1d2129; font-weight: 600;">订单文件总览</h4>
+          <p style="margin: 4px 0 0 0; color: #86909c; font-size: 14px;">共 {{ Object.keys(orderItems).length }} 个规格组合，{{ flattenedOrderItems.length }} 个文件</p>
+        </div>
+        <a-button type="primary" size="large" 
+          @click="downloadAllFiles"
+          :loading="downloadingAll"
+          style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
+          <template #icon><icon-download /></template>
+          打包下载全部文件
+        </a-button>
+      </div>
+    </div>
+
     <div v-if="flattenedOrderItems.length > 0">
       <!-- 按规格组合分组显示 -->
       <div v-for="(group, groupKey) in orderItems" :key="groupKey" style="margin-bottom: 32px;">
@@ -13,8 +30,18 @@
                 规格组合
               </h3>
             </div>
-            <div style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; backdrop-filter: blur(10px);">
-              <span style="color: #fff; font-size: 14px; font-weight: 500;">{{ group.length }} 个文件</span>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <!-- 打包下载按钮 -->
+              <a-button type="primary" size="small" 
+                style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: #fff; backdrop-filter: blur(10px);"
+                @click="downloadGroupFiles(group, groupKey)"
+                :loading="downloadingGroups[groupKey]">
+                <template #icon><icon-download /></template>
+                打包下载
+              </a-button>
+              <div style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; backdrop-filter: blur(10px);">
+                <span style="color: #fff; font-size: 14px; font-weight: 500;">{{ group.length }} 个文件</span>
+              </div>
             </div>
           </div>
           <div style="margin-top: 12px; padding: 12px 16px; background: rgba(255,255,255,0.1); border-radius: 8px; backdrop-filter: blur(5px);">
@@ -107,9 +134,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { IconCopy } from '@arco-design/web-vue/es/icon'
+import { IconCopy, IconDownload } from '@arco-design/web-vue/es/icon'
+import JSZip from 'jszip'
 
 // Props
 const props = defineProps({
@@ -125,6 +153,10 @@ const props = defineProps({
 
 // Emits
 const emit = defineEmits(['update:visible'])
+
+// 下载状态管理
+const downloadingGroups = ref({})
+const downloadingAll = ref(false)
 
 // 计算属性：将对象格式的数据扁平化为数组，用于判断是否有数据
 const flattenedOrderItems = computed(() => {
@@ -180,6 +212,190 @@ const copySpecOptions = async (allKeys) => {
       Message.error('复制失败，请手动复制')
     }
     document.body.removeChild(textArea)
+  }
+}
+
+// 下载文件为Blob
+const downloadFileAsBlob = async (url, filename) => {
+  try {
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    const blob = await response.blob()
+    return { blob, filename }
+  } catch (error) {
+    console.error(`下载文件失败: ${filename}`, error)
+    throw error
+  }
+}
+
+// 打包下载组合文件
+const downloadGroupFiles = async (group, groupKey) => {
+  if (!group || group.length === 0) {
+    Message.warning('该组合下暂无文件可下载')
+    return
+  }
+
+  // 设置下载状态
+  downloadingGroups.value[groupKey] = true
+
+  try {
+    const zip = new JSZip()
+    const downloadPromises = []
+
+    // 为每个文件创建下载任务
+    group.forEach((item, index) => {
+      if (item.fileUrl && item.fileName) {
+        const promise = downloadFileAsBlob(item.fileUrl, item.fileName)
+          .then(({ blob, filename }) => {
+            // 避免文件名重复，添加序号
+            const finalFilename = group.length > 1 ? `${index + 1}_${filename}` : filename
+            zip.file(finalFilename, blob)
+          })
+          .catch(error => {
+            console.error(`文件下载失败: ${item.fileName}`, error)
+            Message.warning(`文件 ${item.fileName} 下载失败，将跳过`)
+          })
+        downloadPromises.push(promise)
+      }
+    })
+
+    // 等待所有文件下载完成
+    await Promise.allSettled(downloadPromises)
+
+    // 检查是否有文件成功添加到zip
+    const fileNames = Object.keys(zip.files)
+    if (fileNames.length === 0) {
+      Message.error('没有文件可以打包下载')
+      return
+    }
+
+    // 生成zip文件
+    const zipBlob = await zip.generateAsync({ type: 'blob' })
+    
+    // 创建下载链接
+    const url = URL.createObjectURL(zipBlob)
+    const link = document.createElement('a')
+    link.href = url
+    
+    // 生成文件名：规格组合_时间戳.zip
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '')
+    const zipFileName = `${groupKey.replace(/[,\s]/g, '_')}_${timestamp}.zip`
+    link.download = zipFileName
+    
+    // 触发下载
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    // 清理URL对象
+    URL.revokeObjectURL(url)
+    
+    Message.success(`成功打包下载 ${fileNames.length} 个文件`)
+    
+  } catch (error) {
+    console.error('打包下载失败:', error)
+    Message.error('打包下载失败，请稍后重试')
+  } finally {
+    // 清除下载状态
+    downloadingGroups.value[groupKey] = false
+  }
+}
+
+// 打包下载所有文件（按规格组合分文件夹）
+const downloadAllFiles = async () => {
+  if (!props.orderItems || Object.keys(props.orderItems).length === 0) {
+    Message.warning('暂无文件可下载')
+    return
+  }
+
+  // 设置下载状态
+  downloadingAll.value = true
+
+  try {
+    const zip = new JSZip()
+    const allDownloadPromises = []
+    let totalFiles = 0
+
+    // 遍历每个规格组合
+    for (const [groupKey, group] of Object.entries(props.orderItems)) {
+      if (!Array.isArray(group) || group.length === 0) continue
+
+      // 为每个规格组合创建文件夹
+      const folderName = groupKey.replace(/[,\s]/g, '_').replace(/[<>:"/\\|?*]/g, '_')
+      const folder = zip.folder(folderName)
+
+      // 为该组合下的每个文件创建下载任务
+      group.forEach((item, index) => {
+        if (item.fileUrl && item.fileName) {
+          totalFiles++
+          const promise = downloadFileAsBlob(item.fileUrl, item.fileName)
+            .then(({ blob, filename }) => {
+              // 避免文件名重复，添加序号
+              const finalFilename = group.length > 1 ? `${index + 1}_${filename}` : filename
+              folder.file(finalFilename, blob)
+            })
+            .catch(error => {
+              console.error(`文件下载失败: ${item.fileName}`, error)
+              Message.warning(`文件 ${item.fileName} 下载失败，将跳过`)
+            })
+          allDownloadPromises.push(promise)
+        }
+      })
+    }
+
+    if (totalFiles === 0) {
+      Message.warning('没有有效的文件可以下载')
+      return
+    }
+
+    // 等待所有文件下载完成
+    await Promise.allSettled(allDownloadPromises)
+
+    // 检查是否有文件成功添加到zip
+    const hasFiles = Object.keys(zip.files).some(path => !path.endsWith('/'))
+    if (!hasFiles) {
+      Message.error('没有文件成功下载，无法创建压缩包')
+      return
+    }
+
+    // 生成zip文件
+    const zipBlob = await zip.generateAsync({ 
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: {
+        level: 6
+      }
+    })
+    
+    // 创建下载链接
+    const url = URL.createObjectURL(zipBlob)
+    const link = document.createElement('a')
+    link.href = url
+    
+    // 生成文件名：订单文件_时间戳.zip
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '')
+    const zipFileName = `订单文件_${timestamp}.zip`
+    link.download = zipFileName
+    
+    // 触发下载
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    // 清理URL对象
+    URL.revokeObjectURL(url)
+    
+    const successCount = Object.keys(zip.files).filter(path => !path.endsWith('/')).length
+    Message.success(`成功打包下载 ${Object.keys(props.orderItems).length} 个规格组合，共 ${successCount} 个文件`)
+    
+  } catch (error) {
+    console.error('全部打包下载失败:', error)
+    Message.error('打包下载失败，请稍后重试')
+  } finally {
+    // 清除下载状态
+    downloadingAll.value = false
   }
 }
 
