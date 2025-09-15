@@ -46,12 +46,12 @@
                     <a-input-number v-model="item.sort" default="index" placeholder="排序" :min="0" />
                   </a-form-item>
                 </a-col> -->
-                <!-- <a-col :span="4">
+                <a-col :span="6">
                   <a-form-item label="状态" field="status">
                     <sa-switch v-model="item.status" type="round" checkedValue="1" uncheckedValue="0" checkedText="启用"
                       uncheckedText="禁用"></sa-switch>
                   </a-form-item>
-                </a-col> -->
+                </a-col>
                 <!-- <a-col :span="6">
                   <a-input v-model="item.description" placeholder="描述" />
                 </a-col> -->

@@ -73,28 +73,28 @@ const handleSubmit = async ({ values, errors }) => {
       <div class="md:w-6/12 w-11/12 md:rounded-r mx-auto pl-5 pr-5 pb-10">
         <h2 class="mt-10 text-3xl pb-0 mb-10 login-title">{{ $t('sys.login.title') }}</h2>
         <a-form :model="form" @submit="handleSubmit">
-          <a-form-item field="username" :hide-label="true" :rules="[{ required: true, message: $t('sys.login.usernameNotice') }]">
-            <a-input v-model="form.username" class="w-full" size="large" :placeholder="$t('sys.login.username')" allow-clear>
+          <a-form-item field="username" :hide-label="true"
+            :rules="[{ required: true, message: $t('sys.login.usernameNotice') }]">
+            <a-input v-model="form.username" class="w-full" size="large" :placeholder="$t('sys.login.username')"
+              allow-clear>
               <template #prefix><icon-user /></template>
             </a-input>
           </a-form-item>
 
-          <a-form-item field="password" :hide-label="true" :rules="[{ required: true, message: $t('sys.login.passwordNotice') }]">
+          <a-form-item field="password" :hide-label="true"
+            :rules="[{ required: true, message: $t('sys.login.passwordNotice') }]">
             <a-input-password v-model="form.password" :placeholder="$t('sys.login.password')" size="large" allow-clear>
               <template #prefix><icon-lock /></template>
             </a-input-password>
           </a-form-item>
 
-          <a-form-item
-            field="code"
-            :hide-label="true"
-            :rules="[
-              {
-                required: true,
-                match: /^[a-zA-Z0-9]{4}$/,
-                message: $t('sys.login.verifyCodeNotice'),
-              },
-            ]">
+          <a-form-item field="code" :hide-label="true" :rules="[
+            {
+              required: true,
+              match: /^[a-zA-Z0-9]{4}$/,
+              message: $t('sys.login.verifyCodeNotice'),
+            },
+          ]">
             <a-input v-model="form.code" :placeholder="$t('sys.login.verifyCode')" size="large" allow-clear>
               <template #prefix><icon-safe /></template>
               <template #append>
@@ -119,7 +119,14 @@ const handleSubmit = async ({ values, errors }) => {
         </a-form>
       </div>
     </div>
+    <div class="icp">
+      <span>
 
+        <a href="https://beian.miit.gov.cn/" target="_blank">新ICP备2025021224号-2</a>
+
+      </span>
+
+    </div>
     <div class="login-bg">
       <div class="fly bg-fly-circle1"></div>
       <div class="fly bg-fly-circle2"></div>
@@ -181,12 +188,14 @@ const handleSubmit = async ({ values, errors }) => {
     display: flex;
     margin-top: 20px;
     color: #333;
+
     span {
       font-size: 28px;
       margin-left: 15px;
       color: rgb(var(--primary-6));
     }
   }
+
   .slogan {
     font-size: 16px;
     line-height: 50px;
@@ -209,6 +218,7 @@ const handleSubmit = async ({ values, errors }) => {
   .alipay:hover {
     background: #165dff;
   }
+
   .wechat:hover {
     background: #0f9c02;
   }
@@ -224,6 +234,14 @@ const handleSubmit = async ({ values, errors }) => {
   z-index: 1;
 }
 
+.icp {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+  color: var(--color-text-2);
+
+}
 .fly {
   pointer-events: none;
   position: fixed;
@@ -269,6 +287,7 @@ const handleSubmit = async ({ values, errors }) => {
   background: linear-gradient(to right, rgba(var(--primary-6), 0.02), rgba(var(--primary-6), 0.04));
   animation: move-ce64e0ea 3.5s linear infinite;
 }
+
 
 @keyframes move-ce64e0ea {
   0% {

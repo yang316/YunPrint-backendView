@@ -1,13 +1,6 @@
 <template>
-  <component
-    is="a-modal"
-    v-model:visible="visible"
-    :width="tool.getDevice() === 'mobile' ? '100%' : '800px'"
-    :title="title"
-    :mask-closable="false"
-    :ok-loading="loading"
-    @cancel="close"
-    @before-ok="submit">
+  <component is="a-modal" v-model:visible="visible" :width="tool.getDevice() === 'mobile' ? '100%' : '800px'"
+    :title="title" :mask-closable="false" :ok-loading="loading" @cancel="close" @before-ok="submit">
     <!-- 表单信息 start -->
     <a-form ref="formRef" :model="formData" :rules="rules" :auto-label-width="true">
       <a-row :gutter="16">
@@ -23,7 +16,7 @@
             <a-input v-model="formData.username" :disabled="mode === 'edit'" placeholder="请输入账户" />
           </a-form-item>
         </a-col>
-        <a-col :span="12">
+        <!-- <a-col :span="12">
           <a-form-item field="dept_id" label="所属部门">
             <a-tree-select
               v-model="formData.dept_id"
@@ -31,6 +24,13 @@
               :field-names="{ key: 'value', title: 'label' }"
               allow-clear
               placeholder="请选择所属部门">
+            </a-tree-select>
+          </a-form-item>
+        </a-col> -->
+        <a-col :span="12">
+          <a-form-item field="role_ids" label="角色">
+            <a-tree-select v-model="formData.role_ids" :data="roleData" :field-names="{ key: 'value', title: 'label' }"
+              :tree-check-strictly="true" allow-clear tree-checkable placeholder="请选择角色">
             </a-tree-select>
           </a-form-item>
         </a-col>
@@ -48,35 +48,10 @@
         </a-col>
       </a-row>
       <a-row :gutter="16">
-        <a-col :span="12">
-          <a-form-item field="role_ids" label="角色">
-            <a-tree-select
-              v-model="formData.role_ids"
-              :data="roleData"
-              :field-names="{ key: 'value', title: 'label' }"
-              :tree-check-strictly="true"
-              allow-clear
-              tree-checkable
-              placeholder="请选择角色">
-            </a-tree-select>
-          </a-form-item>
-        </a-col>
+
         <a-col :span="12">
           <a-form-item field="phone" label="手机">
             <a-input v-model="formData.phone" placeholder="请输入手机" />
-          </a-form-item>
-        </a-col>
-      </a-row>
-      <a-row :gutter="16">
-        <a-col :span="12">
-          <a-form-item field="post_ids" label="岗位">
-            <a-select
-              v-model="formData.post_ids"
-              :options="postData"
-              :field-names="{ label: 'name', value: 'id' }"
-              multiple
-              allow-clear
-              placeholder="请选择岗位" />
           </a-form-item>
         </a-col>
         <a-col :span="12">
@@ -84,6 +59,15 @@
             <a-input v-model="formData.email" placeholder="请输入邮箱" />
           </a-form-item>
         </a-col>
+      </a-row>
+      <a-row :gutter="16">
+        <!-- <a-col :span="12">
+          <a-form-item field="post_ids" label="岗位">
+            <a-select v-model="formData.post_ids" :options="postData" :field-names="{ label: 'name', value: 'id' }"
+              multiple allow-clear placeholder="请选择岗位" />
+          </a-form-item>
+        </a-col> -->
+
       </a-row>
       <a-row :gutter="16">
         <a-col :span="24">
@@ -132,7 +116,7 @@ const initialFormData = {
   avatar: '',
   username: '',
   nickname: '',
-  dept_id: '',
+  dept_id: 0,
   password: '',
   role_ids: [],
   phone: '',
@@ -148,7 +132,7 @@ const formData = reactive({ ...initialFormData })
 // 验证规则
 const rules = {
   username: [{ required: true, message: '账户不能为空' }],
-  dept_id: [{ required: true, message: '部门不能为空' }],
+  // dept_id: [{ required: true, message: '部门不能为空' }],
   role_ids: [{ required: true, message: '角色不能为空' }],
 }
 

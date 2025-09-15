@@ -125,7 +125,17 @@ export default {
       method: 'post',
       data
     })
-  }
+  },
 
+  /**
+   * 打印电子面单
+   */
+  printExpressSheet(data) {
+    return request({
+      url: '/backend/order/Order/printExpressSheet',
+      method: 'post',
+      data
+    })
+  }
 
 }

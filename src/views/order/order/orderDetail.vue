@@ -1,16 +1,34 @@
 <template>
   <a-modal :visible="visible" @update:visible="handleVisibleChange" title="订单详情" :width="900" :footer="false"
     @cancel="handleCancel">
+    <!-- 订单号显示区域 -->
+    <div v-if="orderNo"
+      style="margin-bottom: 20px; padding: 16px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 8px; box-shadow: 0 4px 12px rgba(240, 147, 251, 0.3);">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h4 style="margin: 0; color: #fff; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">订单号</h4>
+          <p
+            style="margin: 4px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px; font-weight: 500; font-family: 'Courier New', monospace;">
+            {{ orderNo }}</p>
+        </div>
+        <a-button type="primary" size="small" @click="copyOrderNo"
+          style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: #fff; backdrop-filter: blur(10px);">
+          <template #icon><icon-copy /></template>
+          复制订单号
+        </a-button>
+      </div>
+    </div>
+
     <!-- 全局操作栏 -->
-    <div v-if="flattenedOrderItems.length > 0" style="margin-bottom: 24px; padding: 16px; background: #f7f8fa; border-radius: 8px; border: 1px solid #e5e6eb;">
+    <div v-if="flattenedOrderItems.length > 0"
+      style="margin-bottom: 24px; padding: 16px; background: #f7f8fa; border-radius: 8px; border: 1px solid #e5e6eb;">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
           <h4 style="margin: 0; color: #1d2129; font-weight: 600;">订单文件总览</h4>
-          <p style="margin: 4px 0 0 0; color: #86909c; font-size: 14px;">共 {{ Object.keys(orderItems).length }} 个规格组合，{{ flattenedOrderItems.length }} 个文件</p>
+          <p style="margin: 4px 0 0 0; color: #86909c; font-size: 14px;">共 {{ Object.keys(orderItems).length }} 个规格组合，{{
+            flattenedOrderItems.length }} 个文件</p>
         </div>
-        <a-button type="primary" size="large" 
-          @click="downloadAllFiles"
-          :loading="downloadingAll"
+        <a-button type="primary" size="large" @click="downloadAllFiles" :loading="downloadingAll"
           style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
           <template #icon><icon-download /></template>
           打包下载全部文件
@@ -22,38 +40,41 @@
       <!-- 按规格组合分组显示 -->
       <div v-for="(group, groupKey) in orderItems" :key="groupKey" style="margin-bottom: 32px;">
         <!-- 优化后的规格组合标题 -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px 24px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);">
+        <div
+          style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px 24px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <div style="display: flex; align-items: center;">
               <div style="width: 4px; height: 24px; background: #fff; border-radius: 2px; margin-right: 12px;"></div>
-              <h3 style="color: #fff; margin: 0; font-size: 18px; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+              <h3
+                style="color: #fff; margin: 0; font-size: 18px; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
                 规格组合
               </h3>
             </div>
             <div style="display: flex; align-items: center; gap: 12px;">
               <!-- 打包下载按钮 -->
-              <a-button type="primary" size="small" 
+              <a-button type="primary" size="small"
                 style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: #fff; backdrop-filter: blur(10px);"
-                @click="downloadGroupFiles(group, groupKey)"
-                :loading="downloadingGroups[groupKey]">
+                @click="downloadGroupFiles(group, groupKey)" :loading="downloadingGroups[groupKey]">
                 <template #icon><icon-download /></template>
                 打包下载
               </a-button>
-              <div style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; backdrop-filter: blur(10px);">
+              <div
+                style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; backdrop-filter: blur(10px);">
                 <span style="color: #fff; font-size: 14px; font-weight: 500;">{{ group.length }} 个文件</span>
               </div>
             </div>
           </div>
-          <div style="margin-top: 12px; padding: 12px 16px; background: rgba(255,255,255,0.1); border-radius: 8px; backdrop-filter: blur(5px);">
+          <div
+            style="margin-top: 12px; padding: 12px 16px; background: rgba(255,255,255,0.1); border-radius: 8px; backdrop-filter: blur(5px);">
             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              <a-tag v-for="(spec, specIndex) in groupKey.split(',')" :key="specIndex" 
+              <a-tag v-for="(spec, specIndex) in groupKey.split(',')" :key="specIndex"
                 style="background: rgba(255,255,255,0.9); color: #4a5568; border: none; border-radius: 6px; padding: 4px 12px; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 {{ spec.trim() }}
               </a-tag>
             </div>
           </div>
         </div>
-        
+
         <a-card v-for="(item, index) in group" :key="item.id" :title="`文件 ${index + 1}: ${item.fileName}`"
           style="margin-bottom: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
           <!-- 基本信息 -->
@@ -148,6 +169,10 @@ const props = defineProps({
   orderItems: {
     type: Object, // 改为 Object 类型
     default: () => ({})
+  },
+  orderNo: {
+    type: String,
+    default: ''
   }
 })
 
@@ -215,6 +240,53 @@ const copySpecOptions = async (allKeys) => {
   }
 }
 
+// 处理文件名编码问题的辅助函数
+const fixFilenameEncoding = (filename) => {
+  if (!filename) return '未命名文件'
+  
+  let result = filename
+  
+  // 尝试多种解码方式
+  try {
+    // 检测是否包含乱码字符
+    if (/[\uFFFD\u00A0-\u9999]/.test(filename)) {
+      // 方法1: 尝试UTF-8解码
+      try {
+        const decoded = decodeURIComponent(escape(filename))
+        if (decoded && decoded !== filename) {
+          result = decoded
+        }
+      } catch (e) {
+        console.warn('UTF-8解码失败', e)
+      }
+      
+      // 方法2: 尝试URL解码
+      if (/[\uFFFD\u00A0-\u9999]/.test(result)) {
+        try {
+          const decoded = decodeURIComponent(filename)
+          if (decoded && decoded !== filename) {
+            result = decoded
+          }
+        } catch (e) {
+          console.warn('URL解码失败', e)
+        }
+      }
+      
+      // 方法3: 如果仍有乱码，尝试直接替换常见乱码模式
+      if (/[\uFFFD\u00A0-\u9999]/.test(result)) {
+        // 创建一个安全的文件名 - 移除或替换不可读字符
+        result = filename
+          .replace(/[\uFFFD]/g, '') // 移除替换字符
+          .replace(/[^\x20-\x7E\u4E00-\u9FFF]/g, '_') // 保留ASCII和中文字符，其他替换为下划线
+      }
+    }
+  } catch (e) {
+    console.warn('文件名解码失败，使用原始文件名', e)
+  }
+  
+  return result
+}
+
 // 下载文件为Blob
 const downloadFileAsBlob = async (url, filename) => {
   try {
@@ -223,7 +295,11 @@ const downloadFileAsBlob = async (url, filename) => {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
     const blob = await response.blob()
-    return { blob, filename }
+    
+    // 处理可能的文件名编码问题
+    const decodedFilename = fixFilenameEncoding(filename)
+    
+    return { blob, filename: decodedFilename }
   } catch (error) {
     console.error(`下载文件失败: ${filename}`, error)
     throw error
@@ -250,7 +326,18 @@ const downloadGroupFiles = async (group, groupKey) => {
         const promise = downloadFileAsBlob(item.fileUrl, item.fileName)
           .then(({ blob, filename }) => {
             // 避免文件名重复，添加序号
-            const finalFilename = group.length > 1 ? `${index + 1}_${filename}` : filename
+            const copies = item.copies || 1
+            
+            // 确保文件名有效
+            let safeFilename = filename
+            
+            // 如果处理后文件名为空，使用默认文件名
+            if (!safeFilename || !safeFilename.trim()) {
+              safeFilename = `文件_${index + 1}.pdf`
+            }
+            
+            // 添加份数信息
+            const finalFilename = group.length > 1 ? `${copies}份_${safeFilename}` : `${copies}份_${safeFilename}`
             zip.file(finalFilename, blob)
           })
           .catch(error => {
@@ -273,27 +360,28 @@ const downloadGroupFiles = async (group, groupKey) => {
 
     // 生成zip文件
     const zipBlob = await zip.generateAsync({ type: 'blob' })
-    
+
     // 创建下载链接
     const url = URL.createObjectURL(zipBlob)
     const link = document.createElement('a')
     link.href = url
-    
-    // 生成文件名：规格组合_时间戳.zip
+
+    // 生成文件名：规格组合_份数_时间戳.zip
     const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '')
+
     const zipFileName = `${groupKey.replace(/[,\s]/g, '_')}_${timestamp}.zip`
     link.download = zipFileName
-    
+
     // 触发下载
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-    
+
     // 清理URL对象
     URL.revokeObjectURL(url)
-    
+
     Message.success(`成功打包下载 ${fileNames.length} 个文件`)
-    
+
   } catch (error) {
     console.error('打包下载失败:', error)
     Message.error('打包下载失败，请稍后重试')
@@ -322,8 +410,10 @@ const downloadAllFiles = async () => {
     for (const [groupKey, group] of Object.entries(props.orderItems)) {
       if (!Array.isArray(group) || group.length === 0) continue
 
-      // 为每个规格组合创建文件夹
-      const folderName = groupKey.replace(/[,\s]/g, '_').replace(/[<>:"/\\|?*]/g, '_')
+      // 为每个规格组合创建文件夹（添加份数信息）
+      // 获取该组合的份数（假设组内所有项目份数相同，取第一个）
+      const copies = group[0]?.copies || 1
+      const folderName = `${groupKey.replace(/[,\s]/g, '_').replace(/[<>:"/\\|?*]/g, '_')}_${copies}份`
       const folder = zip.folder(folderName)
 
       // 为该组合下的每个文件创建下载任务
@@ -332,8 +422,21 @@ const downloadAllFiles = async () => {
           totalFiles++
           const promise = downloadFileAsBlob(item.fileUrl, item.fileName)
             .then(({ blob, filename }) => {
-              // 避免文件名重复，添加序号
-              const finalFilename = group.length > 1 ? `${index + 1}_${filename}` : filename
+// 避免文件名重复，添加序号
+
+              // 在文件名中添加份数信息
+              const copies = item.copies || 1
+              
+              // 确保文件名有效
+               let safeFilename = filename
+               
+               // 如果处理后文件名为空，使用默认文件名
+               if (!safeFilename || !safeFilename.trim()) {
+                 safeFilename = `文件_${index + 1}.pdf`
+               }
+              
+              // 添加份数信息
+              const finalFilename = group.length > 1 ? `${copies}份_${safeFilename}` : `${copies}份_${safeFilename}`
               folder.file(finalFilename, blob)
             })
             .catch(error => {
@@ -374,8 +477,9 @@ const downloadAllFiles = async () => {
     const link = document.createElement('a')
     link.href = url
     
-    // 生成文件名：订单文件_时间戳.zip
+    // 生成文件名：订单号_订单文件_时间戳.zip
     const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '')
+    // const orderNoPrefix = props.orderNo ? `${props.orderNo}_` : ''
     const zipFileName = `订单文件_${timestamp}.zip`
     link.download = zipFileName
     
@@ -413,5 +517,31 @@ const getOptionColor = (optionType) => {
     'multiPage': 'lime'
   }
   return colorMap[optionType] || 'blue'
+}
+
+// 复制订单号
+const copyOrderNo = async () => {
+  if (!props.orderNo) {
+    Message.warning('暂无订单号可复制')
+    return
+  }
+
+  try {
+    await navigator.clipboard.writeText(props.orderNo)
+    Message.success(`已复制订单号: ${props.orderNo}`)
+  } catch (error) {
+    // 降级方案：使用传统的复制方法
+    const textArea = document.createElement('textarea')
+    textArea.value = props.orderNo
+    document.body.appendChild(textArea)
+    textArea.select()
+    try {
+      document.execCommand('copy')
+      Message.success(`已复制订单号: ${props.orderNo}`)
+    } catch (fallbackError) {
+      Message.error('复制失败，请手动复制')
+    }
+    document.body.removeChild(textArea)
+  }
 }
 </script>

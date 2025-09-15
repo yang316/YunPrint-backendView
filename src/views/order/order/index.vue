@@ -23,6 +23,13 @@
           </a-form-item>
         </a-col>
       </template>
+      <template #tableAfterButtons>
+        <!-- 设置价格功能 -->
+        <a-button type="primary" @click="cloundPrint">
+          <template #icon><icon-settings /></template>
+          打印电子面单
+        </a-button>
+      </template>
       <!-- 添加自定义工具栏按钮 -->
       <template #tools>
         <a-button type="primary" @click="handleExport" :loading="exportLoading" :disabled="selections.length === 0">
@@ -32,8 +39,7 @@
       </template>
       <!-- Table 自定义渲染 -->
       <template #operationBeforeExtend="{ record }">
-        <a-button type="text" size="small" @click="showOrderDetails(record.id)">
-          <template #icon><icon-eye /></template>
+        <a-button type="text" size="small" @click="showOrderDetails(record.id, record.order_sn)">
           查看详情
         </a-button>
         <a-button v-if="record.status === 1 && record.payStatus === 1 && record.refundStatus != 2 && !record.billCode"
@@ -65,7 +71,11 @@
       @success="handleShippingSuccess" />
 
     <!-- 订单详情组件 -->
-    <order-detail-modal :visible="detailVisible" @update:visible="detailVisible = $event" :order-items="orderItems" />
+    <order-detail-modal :visible="detailVisible" @update:visible="detailVisible = $event" :order-items="orderItems"
+      :order-no="selectedOrderNo" />
+
+    <!-- 打印电子面单组件 -->
+    <print-modal :visible="printVisible" @update:visible="printVisible = $event" @success="handlePrintSuccess" />
 
   </div>
 </template>
@@ -77,6 +87,7 @@ import EditForm from './edit.vue'
 import RefundModal from './refund.vue'
 import ShippingModal from './shipping.vue'
 import OrderDetailModal from './orderDetail.vue'
+import PrintModal from './printModal.vue'
 import api from '../api/order'
 import userApi from '../../user/api/user'
 
@@ -95,6 +106,10 @@ const selectedOrder = ref(null)
 // 订单详情相关
 const detailVisible = ref(false)
 const orderItems = ref([])
+const selectedOrderNo = ref('')
+
+// 打印电子面单相关
+const printVisible = ref(false)
 
 // 其他状态
 const userList = ref([])
@@ -238,11 +253,12 @@ const refresh = async () => {
 }
 
 // 显示订单详情
-const showOrderDetails = async (orderId) => {
+const showOrderDetails = async (orderId, orderNo) => {
   try {
     const result = await api.getOrderItems(orderId)
     if (result.code === 200) {
       orderItems.value = result.data || []
+      selectedOrderNo.value = orderNo || orderId // 使用传入的订单号，如果没有则使用订单ID
       detailVisible.value = true
     } else {
       Message.error('获取订单详情失败')
@@ -277,6 +293,17 @@ const handleShippingSuccess = () => {
   Message.success('发货成功')
   crudRef.value?.refresh()
   selectedOrder.value = null
+}
+
+// 打印电子面单
+const cloundPrint = () => {
+  printVisible.value = true
+}
+
+// 打印电子面单成功回调
+const handlePrintSuccess = () => {
+  Message.success('打印电子面单成功')
+  crudRef.value?.refresh()
 }
 
 // 页面加载完成执行
