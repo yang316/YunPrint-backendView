@@ -42,13 +42,13 @@
         <a-button type="text" size="small" @click="showOrderDetails(record.id, record.order_sn)">
           查看详情
         </a-button>
-        <a-button v-if="record.status === 1 && record.payStatus === 1 && record.refundStatus != 2 && !record.billCode"
+        <!-- <a-button v-if="record.status === 1 && record.payStatus === 1 && record.refundStatus != 2 && !record.billCode"
           type="text" size="small" @click="showShippingModal(record)" style="color: #00b42a;">
           <template #icon>
             <sa-icon icon="bi:handbag" />
           </template>
           发货
-        </a-button>
+        </a-button> -->
         <a-button v-if="record.refundStatus === 1 && record.payStatus === 1" type="text" size="small"
           @click="showRefundModal(record)" style="color: #f53f3f;">
           <template #icon>

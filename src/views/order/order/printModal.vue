@@ -1,37 +1,19 @@
 <template>
-  <a-modal
-    :visible="visible"
-    @cancel="handleCancel"
-    @ok="handleOk"
-    :title="'打印电子面单'"
-    :mask-closable="false"
-    :unmount-on-close="true"
-    :footer="false"
-    width="800px"
-  >
+  <a-modal :visible="visible" @cancel="handleCancel" @ok="handleOk" :title="'打印电子面单'" :mask-closable="false"
+    :unmount-on-close="true" :footer="false" width="800px">
     <div class="print-modal-container">
       <div class="print-selection">
         <a-alert type="info" class="mb-4">
-          <template #message>
-            请选择需要打印电子面单的订单，只有已发货且有物流单号的订单才能打印电子面单
-          </template>
+          请选择需要打印电子面单的订单，只有已支付且未发货的订单才能打印电子面单
         </a-alert>
-        
-        <a-table
-          :data="orderList"
-          :loading="loading"
-          :pagination="pagination"
-          @page-change="onPageChange"
-          @page-size-change="onPageSizeChange"
-          row-key="id"
-          v-model:selectedKeys="selectedOrders"
-          :row-selection="{
+
+        <a-table :data="orderList" :loading="loading" :pagination="pagination" @page-change="onPageChange"
+          @page-size-change="onPageSizeChange" row-key="id" v-model:selectedKeys="selectedOrders" :row-selection="{
             type: 'checkbox',
             showCheckedAll: true,
             onlyCurrent: false,
             // onChange: onSelectionChange
-          }"
-        >
+          }">
           <template #columns>
             <a-table-column title="订单号" data-index="order_sn" />
             <a-table-column title="收件人" data-index="address.consignee" />
@@ -52,7 +34,7 @@
           </template>
         </a-table>
       </div>
-      
+
       <div class="print-actions mt-4">
         <a-space>
           <a-button type="primary" @click="handlePrint" :loading="printLoading" :disabled="selectedOrders.length === 0">
@@ -89,7 +71,7 @@ const loading = ref(false)
 const printLoading = ref(false)
 const orderList = ref([])
 const selectedOrders = ref([])
-// watch(()=>selectedOrders.value,()=>{
+// watch(()=>selectedOrders.value,()=>{ 
 //   console.log(selectedOrders)
 
 // })
@@ -111,6 +93,7 @@ const fetchOrders = async () => {
       pageSize: pagination.pageSize,
       // 只获取已发货的订单
       status: 1, // 假设状态2表示已发货
+      billCode: 0,
     }
     const res = await api.getPageList(params)
     if (res.code === 200) {
